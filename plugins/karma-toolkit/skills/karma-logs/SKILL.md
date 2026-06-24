@@ -1,6 +1,6 @@
 ---
 name: karma-logs
-description: Audit a backend's observability and logging readiness before production — when it breaks, will you be able to see what and why? Checks for structured logging, coverage of key events (requests, errors, auth, external calls), secrets/PII leaking into logs, metrics, tracing, alerting, health checks, and prod log hygiene. Detects the stack and existing tooling, reports gaps as a prioritized checklist, and adds logging only on approval. Honest: observability lets you SEE problems, it does not prevent them.
+description: Audit a backend's observability and logging readiness before production — when it breaks, will you be able to see what and why? Checks for structured logging, coverage of key events (requests, errors, auth, external calls), secrets/PII leaking into logs, metrics, tracing, alerting, health checks, and prod log hygiene. Detects the stack and existing tooling, reports gaps as a prioritized checklist, and adds logging only on approval. Honest — observability lets you SEE problems, it does not prevent them.
 ---
 
 # Karma Logs

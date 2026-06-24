@@ -1,6 +1,6 @@
 ---
 name: karma-load
-description: Local load-test a backend to find bugs and bottlenecks under load before production. Use when the user wants to stress an app locally with a popular open-source tool (k6 by default), surface slow queries / N+1 / leaks / deadlocks / connection-pool limits from logs and metrics, profile relative improvements, and produce a cautious production scaling plan. Detects how the app runs (Docker if present, else native); ramps load in stages against pass/fail SLOs; collects findings into notes/ then tasks/. Runs in planning mode with approval gates. LOCAL-ONLY: finds problems cheaply; does NOT produce production-valid absolute RPS numbers.
+description: Local load-test a backend to find bugs and bottlenecks under load before production. Use when the user wants to stress an app locally with a popular open-source tool (k6 by default), surface slow queries / N+1 / leaks / deadlocks / connection-pool limits from logs and metrics, profile relative improvements, and produce a cautious production scaling plan. Detects how the app runs (Docker if present, else native); ramps load in stages against pass/fail SLOs; collects findings into notes/ then tasks/. Runs in planning mode with approval gates. LOCAL-ONLY — finds problems cheaply; does NOT produce production-valid absolute RPS numbers.
 ---
 
 # Karma Load (local)

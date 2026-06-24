@@ -1,6 +1,6 @@
 ---
 name: karma-security
-description: Self-contained, iterative, verification-driven security audit of your own codebase before production. Runs a full white-box + gray-box audit mapped to OWASP Top 10:2025 / CWE / NIST CSF 2.0, loops until it stops finding new confirmed issues, adversarially verifies each finding with an independent subagent to filter false positives, and produces a prioritized fix plan. Defensive use on the user's own authorized code. Honest about limits: it reduces risk, it never proves "no vulnerabilities".
+description: Self-contained, iterative, verification-driven security audit of your own codebase before production. Runs a full white-box + gray-box audit mapped to OWASP Top 10:2025 / CWE / NIST CSF 2.0, loops until it stops finding new confirmed issues, adversarially verifies each finding with an independent subagent to filter false positives, and produces a prioritized fix plan. Defensive use on the user's own authorized code. Honest about limits — it reduces risk, it never proves "no vulnerabilities".
 ---
 
 # Karma Security
