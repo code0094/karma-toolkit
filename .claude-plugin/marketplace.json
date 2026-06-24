@@ -1,0 +1,14 @@
+{
+  "name": "karma",
+  "owner": {
+    "name": "code0094",
+    "email": "romik.ershov123@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "karma-toolkit",
+      "source": "./plugins/karma-toolkit",
+      "description": "Plan-first skill family for bringing code to production, plus a SessionStart policy hook."
+    }
+  ]
+}

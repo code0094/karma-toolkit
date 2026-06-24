@@ -1,0 +1,19 @@
+{
+  "name": "karma-toolkit",
+  "version": "0.1.0",
+  "description": "Plan-first 'bring code to production' skill family — refactoring, UI refactoring, a quality loop, tests, local load-testing, security audit, observability, and a preflight orchestrator. Each proposes a discussable plan, uses an independent critic/verifier, and is honest about its limits. Ships a SessionStart policy hook.",
+  "author": {
+    "name": "code0094",
+    "email": "romik.ershov123@gmail.com"
+  },
+  "keywords": [
+    "refactoring",
+    "testing",
+    "tdd",
+    "security",
+    "load-testing",
+    "observability",
+    "preflight",
+    "production-readiness"
+  ]
+}

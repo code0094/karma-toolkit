@@ -1,0 +1,31 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/session-start.js"]
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(git push *)",
+            "command": "node",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/secret-scan.js"],
+            "timeout": 30,
+            "statusMessage": "Scanning changes for secrets before push..."
+          }
+        ]
+      }
+    ]
+  }
+}
