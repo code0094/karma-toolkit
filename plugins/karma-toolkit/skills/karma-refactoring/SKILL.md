@@ -1,6 +1,6 @@
 ---
 name: karma-refactoring
-description: Pragmatic maintenance refactoring workflow for codebases. Use when asked to make a codebase easier to understand, safer to change, or more consistent with existing architecture without changing behavior; includes repository discovery, scoped refactor selection, challenge review, minimal implementation, validation, and a "no changes needed" outcome.
+description: Прагматичный воркфлоу поддерживающего рефакторинга для кодовых баз. Используй, когда просят сделать код понятнее, безопаснее для изменений или согласованнее с существующей архитектурой без изменения поведения. Включает изучение репозитория, выбор узкого скоупа рефактора, challenge-ревью, минимальную реализацию, валидацию и допустимый исход «правки не нужны».
 ---
 
 # Karma Refactoring

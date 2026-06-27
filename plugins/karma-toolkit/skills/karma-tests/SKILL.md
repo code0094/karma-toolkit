@@ -1,6 +1,6 @@
 ---
 name: karma-tests
-description: Cover an existing application's main scenarios with automated tests you can actually trust, one feature at a time. Use when the user wants to replace manual testing with e2e/integration/unit tests, build a test suite from scratch, or systematically raise meaningful coverage of business logic. Detects the stack and uses popular open-source tooling; pairs test-writing with an independent reviewer and (when available) mutation testing as an objective trust gate. Also use to introduce TDD for new work going forward.
+description: Покрытие основных сценариев существующего приложения автотестами, которым реально можно верить, по одной фиче за раз. Используй, когда нужно заменить ручное тестирование на e2e/интеграционные/юнит-тесты, собрать тестовый набор с нуля или системно поднять осмысленное покрытие бизнес-логики. Определяет стек и берёт популярные опенсорс-инструменты, дополняет написание тестов независимым ревьюером и (если доступно) mutation-тестированием как объективным гейтом доверия. Также используй, чтобы внедрить TDD для новой разработки.
 ---
 
 # Karma Tests

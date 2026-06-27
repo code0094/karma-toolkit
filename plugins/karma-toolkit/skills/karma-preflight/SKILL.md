@@ -1,6 +1,6 @@
 ---
 name: karma-preflight
-description: Pre-production readiness check that orchestrates the karma-* skills plus extra gating checks to answer one question — are we ready to ship? Runs tests, load, security, and observability readiness in sequence by delegating to karma-tests / karma-load / karma-security / karma-logs, then adds checks with no dedicated skill (secrets in repo, env config, migration safety, rollback plan). Produces a GO / NO-GO verdict with blockers. A thin orchestrator — it calls the granular skills, it does not replace or duplicate them.
+description: Проверка готовности к продакшену — оркестрирует скиллы karma-* плюс дополнительные гейты, чтобы ответить на один вопрос — готовы ли мы катить? Последовательно прогоняет тесты, нагрузку, безопасность и наблюдаемость, делегируя karma-tests / karma-load / karma-security / karma-logs, затем добавляет проверки без отдельного скилла (секреты в репозитории, env-конфиг, безопасность миграций, план отката). Выдаёт вердикт GO / NO-GO со списком блокеров. Тонкий оркестратор — вызывает гранулярные скиллы, не заменяя и не дублируя их.
 ---
 
 # Karma Preflight

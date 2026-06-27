@@ -1,6 +1,6 @@
 ---
 name: karma-refactoring-ui
-description: Deep UI code refactoring workflow for enforcing strict component ownership of visual styling. Use when the user invokes `/karma-refactoring-ui`, asks for systematic UI refactoring, or wants pages/screens/routes cleaned up so visual styles live inside reusable components while external code controls only layout composition.
+description: Глубокий воркфлоу рефакторинга UI-кода для строгого владения компонентами своими визуальными стилями. Используй, когда вызывают `/karma-refactoring-ui`, просят системный UI-рефакторинг или хотят почистить страницы/экраны/роуты так, чтобы визуальные стили жили внутри переиспользуемых компонентов, а внешний код управлял только композицией раскладки.
 ---
 
 # Karma Refactoring (UI)
