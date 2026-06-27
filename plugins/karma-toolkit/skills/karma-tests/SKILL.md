@@ -43,6 +43,20 @@ All subagents run the single most capable model available at runtime, at the hig
 - **Characterization (existing code):** tests written AFTER the code, locking in current observable behavior. This is the bulk of "cover the app". **Caveat:** do not bake bugs in as expected behavior — if the scenario spar reveals that current behavior looks wrong, flag it for the user, don't enshrine it in a test.
 - **TDD (new code / bug fixes going forward):** Red -> Green -> Refactor. Write a failing test first, see it red, write the minimum code to make it green, then refactor under the test's protection. Use this for any new feature or fix from now on. A TDD test is trustworthy by construction because you watched it fail.
 
+## Adopt TDD in this project (opt-in)
+
+TDD is a *going-forward* methodology, so anchor it **per project**, not globally. While working in a project, check whether its root `CLAUDE.md` already contains a `karma-tdd` managed block. If it does, do nothing. If it doesn't, **offer** to add one — never write to the user's `CLAUDE.md` silently; ask first, since it's their file (the plan-first contract applies to config too).
+
+On approval, insert this idempotent managed block (create `CLAUDE.md` if absent):
+
+```
+<!-- karma-tdd:start -->
+- New code and bug fixes: write the test first (TDD). Cover existing code with the karma-tests skill.
+<!-- karma-tdd:end -->
+```
+
+Idempotency is keyed on the markers: if the block is already present, leave it — never duplicate. This keeps the TDD habit alive in this project's future sessions (where you actually practice it) instead of imposing it on every session globally.
+
 ## Test mix
 
 Bias toward the **Testing Trophy**, not a strict pyramid:

@@ -9,7 +9,6 @@
 const policy = [
   "# karma-toolkit — standing policy",
   "",
-  "- New code: write the test first (TDD). To cover existing code with tests, use the karma-tests skill.",
   "- The karma-* skills are plan-first: they propose a discussable plan and wait for approval before changing code. karma-loop is the intentional autonomous exception.",
 ].join("\n");
 
