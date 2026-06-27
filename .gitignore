@@ -5,3 +5,6 @@ Thumbs.db
 
 # Node (none committed; guard against accidental installs)
 node_modules/
+
+# Local working notes — personal memo, not published to the public plugin repo
+CLAUDE.md
