@@ -1,58 +1,60 @@
 # karma-toolkit
 
-A plan-first **"bring code to production"** skill family for Claude Code. Eight skills, each wrapping one production-readiness workflow with an independent critic/verifier and honest framing of its limits — plus a `SessionStart` hook that injects a standing TDD / plan-first policy into every session.
+Plan-first семейство скиллов «довести код до продакшена» для Claude Code. Восемь скиллов, каждый оборачивает один воркфлоу подготовки к проду с независимым критиком/верификатором и честной оговоркой о пределах — плюс два хука: `SessionStart` подмешивает в каждую сессию постоянную TDD/plan-first-политику, а `PreToolUse` сканирует изменения на секреты перед `git push`.
 
-## The skills
+## Скиллы
 
-| Command | What it does |
-|---------|--------------|
-| `/karma-toolkit:karma-refactoring` | Behavior-preserving maintenance refactor (scope proposal + challenge checkpoint). |
-| `/karma-toolkit:karma-refactoring-ui` | Move visual styling into components; layout stays outside. |
-| `/karma-toolkit:karma-loop` | Autonomous fix → re-grade loop to a quality bar (the one non–plan-first skill). |
-| `/karma-toolkit:karma-tests` | Trustworthy test coverage, feature by feature, with an independent reviewer. |
-| `/karma-toolkit:karma-load` | **Local** load-testing to find bottlenecks and bugs (no cloud). |
-| `/karma-toolkit:karma-security` | Iterative, self-contained security audit with adversarial verification. |
-| `/karma-toolkit:karma-logs` | Observability / logging readiness before production. |
-| `/karma-toolkit:karma-preflight` | Thin orchestrator: runs the others + secrets/env/migration/rollback checks → GO / NO-GO. |
+| Команда | Что делает |
+|---------|------------|
+| `/karma-toolkit:karma-refactoring` | Поддерживающий рефакторинг без изменения поведения (предложение скоупа + challenge-чекпойнт). |
+| `/karma-toolkit:karma-refactoring-ui` | Визуальные стили — внутрь компонентов; раскладка остаётся снаружи. |
+| `/karma-toolkit:karma-loop` | Автономная петля «правки → переоценка» до планки качества. Без лимита итераций — единственный не-plan-first скилл. |
+| `/karma-toolkit:karma-tests` | Покрытие тестами, которым можно верить, по одной фиче, с независимым ревьюером. |
+| `/karma-toolkit:karma-load` | **Локальное** нагрузочное тестирование — ищет узкие места и баги (без облака). |
+| `/karma-toolkit:karma-security` | Итеративный самодостаточный security-аудит с состязательной проверкой находок. |
+| `/karma-toolkit:karma-logs` | Готовность наблюдаемости и логирования перед продакшеном. |
+| `/karma-toolkit:karma-preflight` | Тонкий оркестратор: прогоняет остальные + проверки секретов/env/миграций/отката → GO / NO-GO. |
 
-## Two principles across the family
+## Два принципа семейства
 
-- **Plan-first.** Every skill (except `karma-loop`) produces a *discussable plan* — what / why / where — and waits for approval before changing code. Run in plan mode (Shift+Tab) for hard enforcement.
-- **Honest about limits.** No skill claims certainty it can't have ("zero vulnerabilities", "guaranteed to hold X rps"). They reduce risk and report residual risk.
+- **Plan-first.** Каждый скилл (кроме `karma-loop`) выдаёт *обсуждаемый план* — что / почему / где — и ждёт апрува перед изменением кода. Для жёсткого соблюдения запускай в plan mode (Shift+Tab).
+- **Честность о пределах.** Ни один скилл не обещает того, чего не может («ноль уязвимостей», «гарантированно держит X rps»). Они снижают риск и честно сообщают об остаточном.
 
-## Install (via marketplace)
+## Установка (через маркетплейс)
 
 ```bash
-/plugin marketplace add <git-url-of-this-repo>
+/plugin marketplace add https://github.com/code0094/karma-toolkit
 /plugin install karma-toolkit@karma
 ```
 
-Commands are namespaced under the plugin: `/karma-toolkit:karma-<name>`. To update later: `/plugin marketplace update karma`.
+Команды неймспейснуты под плагином: `/karma-toolkit:karma-<имя>`. Обновить позже: `/plugin marketplace update karma`.
 
-## Local development & testing
+## Локальная разработка и тестирование
 
 ```bash
-# Load the plugin directly for a session, without installing:
+# Загрузить плагин в сессию напрямую, без установки:
 claude --plugin-dir ./plugins/karma-toolkit
 
-# Validate manifest + skill frontmatter + hooks.json:
+# Провалидировать манифест + frontmatter скиллов + hooks.json:
 claude plugin validate ./plugins/karma-toolkit
 
-# See plugin loading + hook registration:
+# Посмотреть загрузку плагина и регистрацию хуков:
 claude --debug
 ```
 
-The `SessionStart` hook runs `node scripts/session-start.js` (exec form, so it works under Git Bash or PowerShell on Windows) and injects the standing policy as session context.
+Оба хука запускаются в exec-форме через `node` (работает и под Git Bash, и под PowerShell на Windows): `SessionStart` подмешивает политику в контекст сессии, а `PreToolUse` блокирует `git push`, если в изменениях найдены секреты (эвристический скан — сеть безопасности, не гарантия).
 
-## Layout
+## Структура
 
 ```
 .
-├── .claude-plugin/marketplace.json   # this repo is also a marketplace
+├── .claude-plugin/marketplace.json   # этот репозиторий — ещё и маркетплейс
 └── plugins/
     └── karma-toolkit/
         ├── .claude-plugin/plugin.json
-        ├── hooks/hooks.json          # SessionStart -> scripts/session-start.js
-        ├── scripts/session-start.js  # prints the policy as additionalContext
-        └── skills/karma-*/SKILL.md   # the eight skills
+        ├── hooks/hooks.json          # SessionStart + PreToolUse (secret-scan)
+        ├── scripts/
+        │   ├── session-start.js      # печатает политику как additionalContext
+        │   └── secret-scan.js        # сканит дифф на секреты перед git push
+        └── skills/karma-*/SKILL.md   # восемь скиллов
 ```
