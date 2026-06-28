@@ -57,10 +57,11 @@ This loop is **unbounded by design** (the user's explicit choice): there is no m
 1. Run `git status --short --branch`. Note pre-existing/user-owned changes and do not clobber them. If not a git repo, warn that per-iteration rollback is manual.
 2. Discover validation commands (test, typecheck, lint, build) from package scripts, Makefile, CI config, or docs. If none exist, say so — the gate degrades to "judge-only".
 3. Initialize an empty decision journal.
+4. **Check coverage.** Read the coverage catalog (`notes/test-catalog.md`, or a `CLAUDE.md` pointer to it) and scan for existing test files. If there is no meaningful coverage, don't loop blind — use **AskUserQuestion** to suggest running `/karma-tests` first (polishing code with no test safety net just hardens unverified behavior). The user may decline and proceed anyway.
 
 **Each iteration:**
 
-a. **Judge.** Spawn a fresh judge subagent (see Roles — `feature-dev:code-reviewer` if available, else `Explore`; most capable model available, highest reasoning effort). Give it: the scope, the fixed rubric above, the required verdict format, and the **decision journal so far** (every prior round's changes + rationale + the judge's prior top issues). Instruct it: *"Do not contradict an accepted decision from the journal unless you explicitly justify it as a regression worth reverting."* This is what prevents oscillation (round N undoing round N-1).
+a. **Judge.** Spawn a fresh judge subagent (see Roles — `feature-dev:code-reviewer` if available, else `Explore`; most capable model available, highest reasoning effort). Give it: the scope, the fixed rubric above, the required verdict format, the **coverage catalog** (so it does not flag already-covered code as untested), and the **decision journal so far** (every prior round's changes + rationale + the judge's prior top issues). Instruct it: *"Do not contradict an accepted decision from the journal unless you explicitly justify it as a regression worth reverting."* This is what prevents oscillation (round N undoing round N-1).
 
 b. **Check stop.** Record `overall`, update the best version.
    - If `overall` >= 9.5 **and** the previous pass was also >= 9.5 -> **DONE (PASS)**.
