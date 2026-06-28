@@ -27,7 +27,7 @@ Detect the stack and what is already present — logging library, metrics librar
 ## Audit dimensions
 
 1. **Structured logging** — a real logger (not scattered `print`/`console.log`), structured output (JSON), severity levels (debug/info/warn/error), and request/trace-id correlation so one request's lines can be tied together.
-2. **Coverage of key events** — incoming requests, errors/exceptions **with context** (not just the message), auth events, important business operations, and external calls (DB/API) with timings. Flag **swallowed exceptions that log nothing** (this overlaps karma-security A09/A10 and the silent-failure smell from karma-refactoring).
+2. **Coverage of key events** — incoming requests, errors/exceptions **with context** (not just the message), auth events, important business operations, and external calls (DB/API) with timings. Flag **swallowed exceptions that log nothing** (this overlaps karma-security A09/A10 and is a classic silent-failure smell).
 3. **Sensitive data in logs** — secrets, tokens, passwords, PII, card numbers must **not** be logged. Treat any leak as **high priority** — it is a security issue, not just hygiene.
 4. **Metrics** — latency, error rate, throughput, and resource use instrumented; a metrics endpoint (e.g. `/metrics`) where applicable.
 5. **Tracing** — distributed tracing (e.g. OpenTelemetry) across services/workers if the system spans processes.

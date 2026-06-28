@@ -68,7 +68,7 @@ b. **Check stop.** Record `overall`, update the best version.
    - If `overall` >= 9.5 and it's the first such pass -> run a **confirming pass**: go back to (a) with NO edits.
    - Otherwise continue to (c). There is no iteration cap — only PASS or a manual stop ends the loop.
 
-c. **Fix.** Take the highest-value issues (blockers/majors first). Make the **minimal connected diff**. Preserve public API, contracts, response shapes, permissions, security behavior, and business behavior unless the user asked otherwise (reuse the discipline from the `karma-refactoring` skill). Do not chase the score with cosmetic churn.
+c. **Fix.** Take the highest-value issues (blockers/majors first). Make the **minimal connected diff**. Preserve public API, contracts, response shapes, permissions, security behavior, and business behavior unless the user asked otherwise — keep changes minimal and behavior-preserving. Do not chase the score with cosmetic churn.
 
 d. **Journal.** Append: round #, `overall`, the fixes made, the rationale, and the judge's top issues this round.
 

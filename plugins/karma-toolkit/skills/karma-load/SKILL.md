@@ -20,7 +20,7 @@ By default this skill produces a **discussable plan, not changes**. It ends its 
 ## Operating rules
 
 - Run in **planning mode**; stop at the approval gates below before making fixes or starting a long run.
-- Do not change app behavior or public contracts while fixing bottlenecks beyond what the user approves (reuse the discipline from the `karma-refactoring` skill).
+- Do not change app behavior or public contracts while fixing bottlenecks beyond what the user approves — keep fixes minimal and behavior-preserving.
 - **Docker is nice-to-have, not required** — use whatever run method the project already has.
 
 ## How the app runs (detect, don't impose)
