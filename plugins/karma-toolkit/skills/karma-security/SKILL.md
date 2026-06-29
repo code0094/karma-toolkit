@@ -155,6 +155,23 @@ Save to `./security-audit-report.md`. Structure:
 - **Hotspots & smells.**
 - **Convergence & residual risk** — passes with no new findings / max reached; honest residual-risk statement; external-pentest recommendation for high-stakes. No "zero vulnerabilities"; no transfer of the production decision to the AI.
 
+## Anchor the security invariants in CLAUDE.md (automatic)
+
+Capture the security **invariants** that hold in this project so future code upholds them instead of silently breaking them. As a standard final step, write/refresh this skill's sub-block in the umbrella `karma-toolkit` block at the **end** of the project root `CLAUDE.md`. **Write it automatically — do not ask.** This is the one exception to the plan-first contract: the verified fix *plan* and any code fixes stay gated as above, but this small managed note is written without a prompt (in plan mode the write defers to the execution phase like any edit). Touch only your own `<!-- karma-security:start/end -->` sub-block; idempotent on the markers — no umbrella block yet → append it at the end of the file (create `CLAUDE.md` if absent); your sub-block already present → replace its body, never duplicate; leave other skills' sub-blocks intact.
+
+```
+<!-- karma-toolkit:start -->
+## karma-toolkit — project conventions (managed; edited by the karma-* skills)
+
+<!-- karma-security:start -->
+Security invariants here: <the real ones you found/confirmed — e.g. parameterized queries only (no string-built SQL); escape() on all user-rendered text; constant-time secret compare; secrets via env, never in git or the client bundle; CSRF Origin/Referer check on state-changing POST under /admin; X-Forwarded-For trusted only from the reverse proxy>.
+- New endpoint → uphold these invariants; never log secrets or PII.
+<!-- karma-security:end -->
+<!-- karma-toolkit:end -->
+```
+
+Fill with the project's **actual** invariants (the ones the audit confirmed are in force), not a generic checklist — these are the rules a future change must not regress. Record the invariants even when the audit found no new issues (the conventions are durable regardless of findings).
+
 ## Guardrails
 
 - Verify before reporting — independent subagent that tries to refute. Cut false positives; a noisy list buries the real issues.

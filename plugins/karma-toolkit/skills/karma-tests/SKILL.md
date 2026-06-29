@@ -43,24 +43,27 @@ All subagents run the single most capable model available at runtime, at the hig
 - **Characterization (existing code):** tests written AFTER the code, locking in current observable behavior. This is the bulk of "cover the app". **Caveat:** do not bake bugs in as expected behavior — if the scenario spar reveals that current behavior looks wrong, flag it for the user, don't enshrine it in a test.
 - **TDD (new code / bug fixes going forward):** Red -> Green -> Refactor. Write a failing test first, see it red, write the minimum code to make it green, then refactor under the test's protection. Use this for any new feature or fix from now on. A TDD test is trustworthy by construction because you watched it fail.
 
-## Anchor TDD + a coverage catalog in this project (opt-in)
+## Anchor TDD + a coverage catalog in this project
 
-TDD is a *going-forward* methodology, so anchor it **per project**, not globally. Two artifacts make the habit stick and let `karma-loop` see coverage without guessing:
+TDD is a *going-forward* methodology, so anchor it **per project**, not globally. Two artifacts make the habit stick and let `karma-loop` see coverage without guessing.
 
 **1. Coverage catalog.** Maintain `notes/test-catalog.md` — a simple map of `feature / module → test files → what's covered`. Create it the first time you write tests here, and **update it whenever you add or change tests** so it never goes stale. It is the single source of truth other skills (e.g. `karma-loop`) read to know what is covered — and because the entries come from this skill, they are already vetted (designer spar + reviewer + mutation), not just "a file exists".
 
-**2. CLAUDE.md anchor — offer, don't write silently.** Check whether the project's root `CLAUDE.md` already contains a `karma-tdd` managed block. If it does, do nothing. If not, **offer** to add one — never edit the user's `CLAUDE.md` without asking (the plan-first contract applies to config too). On approval, insert this idempotent block (create `CLAUDE.md` if absent), plus a one-line pointer to the catalog:
+**2. CLAUDE.md anchor (automatic).** As a standard final step, write/refresh this skill's sub-block in the umbrella `karma-toolkit` block at the **end** of the project root `CLAUDE.md`, so the next session inherits the TDD habit and the coverage-map pointer. **Write it automatically — do not ask.** This is the one exception to the plan-first contract: test/code changes stay gated as above, but this small managed note is written without a prompt (in plan mode the write defers to the execution phase like any edit). Touch only your own `<!-- karma-tests:start/end -->` sub-block; idempotent on the markers — no umbrella block yet → append it at the end of the file (create `CLAUDE.md` if absent); your sub-block already present → replace its body, never duplicate; leave other skills' sub-blocks intact. If a legacy `<!-- karma-tdd:start/end -->` block exists, replace it with the `karma-tests` sub-block below.
 
 ```
+<!-- karma-toolkit:start -->
+## karma-toolkit — project conventions (managed; edited by the karma-* skills)
+
+<!-- karma-tests:start -->
 Tests are catalogued in `notes/test-catalog.md`.
-
-<!-- karma-tdd:start -->
-- New code / bug fixes → write the test first (TDD).
+- New code / bug fix → write the test first (TDD).
 - New feature or a closed milestone → cover it with the karma-tests skill.
-<!-- karma-tdd:end -->
+<!-- karma-tests:end -->
+<!-- karma-toolkit:end -->
 ```
 
-Idempotency is keyed on the markers: if the block is already present, leave it — never duplicate. This keeps the TDD habit and a live coverage map in this project's future sessions — where you actually practice it — instead of imposing it on every session globally. The milestone/feature line is a *semantic* trigger: there is no hook for "a feature started", so the agent applies this rule when it recognizes the moment.
+The milestone/feature line is a *semantic* trigger: there is no hook for "a feature started", so the agent applies this rule when it recognizes the moment. This keeps the TDD habit and a live coverage map in this project's future sessions — where you actually practice it — instead of imposing it on every session globally.
 
 ## Test mix
 

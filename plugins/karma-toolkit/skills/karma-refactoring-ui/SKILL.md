@@ -113,3 +113,20 @@ After each file or coherent file group, report:
 ## Expected Result
 
 Pages, screens, and routes should become clean composition layers. Components should become predictable, reusable, visually self-contained units. The codebase should no longer rely on cosmetic style pass-throughs, scattered hardcoded styling, or call-site overrides to assemble final UI.
+
+## Anchor the UI convention in CLAUDE.md (automatic)
+
+Capture how visual ownership works in this project so future components keep cosmetics inside and don't reintroduce call-site overrides. As a standard final step, write/refresh this skill's sub-block in the umbrella `karma-toolkit` block at the **end** of the project root `CLAUDE.md`. **Write it automatically — do not ask.** This is the one exception to the plan-first contract: the refactor *plan* and any code changes stay gated as above, but this small managed note is written without a prompt (in plan mode the write defers to the execution phase like any edit). Touch only your own `<!-- karma-refactoring-ui:start/end -->` sub-block; idempotent on the markers — no umbrella block yet → append it at the end of the file (create `CLAUDE.md` if absent); your sub-block already present → replace its body, never duplicate; leave other skills' sub-blocks intact.
+
+```
+<!-- karma-toolkit:start -->
+## karma-toolkit — project conventions (managed; edited by the karma-* skills)
+
+<!-- karma-refactoring-ui:start -->
+UI convention here: components own their visual styling; callers pass only semantic props (`variant`/`size`/`tone`/`state`…) plus layout wrappers. <Where shared components live — e.g. lib/src/widgets/; private one-screen widgets co-located>.
+- New component → keep cosmetics inside it; no `style`/`className`/cosmetic pass-through from the call site.
+<!-- karma-refactoring-ui:end -->
+<!-- karma-toolkit:end -->
+```
+
+Fill with the project's **actual** convention (where shared components live, the real naming), not a generic note. Align with the existing design system rather than imposing a new one.

@@ -45,19 +45,23 @@ Detect the stack and what is already present — logging library, metrics librar
 
 Don't add logging by default. Present the gap list and let the user approve. On approval, add minimal structured logging / instrumentation as small diffs — no behavior change, no chatty debug spam.
 
-## Anchor the logging convention in this project (opt-in)
+## Anchor the logging convention in this project (automatic)
 
-Once logging exists in the project, capture **how it works here** so future code follows it (and so the next session knows where to look). After making changes — and only with the user's approval, never silently — offer to add an idempotent managed block to the project's root `CLAUDE.md`:
+Once logging exists in the project, capture **how it works here** so future code follows it (and so the next session knows where to look). As a standard final step, write/refresh this skill's sub-block in the umbrella `karma-toolkit` block at the **end** of the project root `CLAUDE.md`. **Write it automatically — do not ask.** This is the one exception to the plan-first contract: logging *code* changes stay gated as above, but this small managed note is written without a prompt (in plan mode the write defers to the execution phase like any edit). Touch only your own `<!-- karma-logs:start/end -->` sub-block; idempotent on the markers — no umbrella block yet → append it at the end of the file (create `CLAUDE.md` if absent); your sub-block already present → replace its body, never duplicate; leave other skills' sub-blocks intact.
 
 ```
+<!-- karma-toolkit:start -->
+## karma-toolkit — project conventions (managed; edited by the karma-* skills)
+
 <!-- karma-logs:start -->
 Logging here: <how it is actually set up — e.g. structlog -> JSON to stdout; global exception handler in main.py with route/ip context; admin mutations -> audit logger>.
 - New feature / endpoint -> check whether there is anything to log (errors, important events) and add it following the same pattern.
 - Never log secrets or PII.
 <!-- karma-logs:end -->
+<!-- karma-toolkit:end -->
 ```
 
-Fill the first line with the project's **actual** setup (what you found/configured), not a generic placeholder — that line is also the entry point for finding logs in a later session (what to grep, where the handler lives). Idempotency is keyed on the markers: if the block exists, leave it; never duplicate. Same per-project opt-in pattern as karma-tests' TDD block. Do NOT also maintain a separate logger catalog — the block plus grep is enough (loggers are trivially greppable; unlike test coverage they need no vetted index).
+Fill the first line with the project's **actual** setup (what you found/configured), not a generic placeholder — that line is also the entry point for finding logs in a later session (what to grep, where the handler lives). Do NOT also maintain a separate logger catalog — the block plus grep is enough (loggers are trivially greppable; unlike test coverage they need no vetted index). If logging does not yet exist and this run added none, write nothing.
 
 ## Final report
 

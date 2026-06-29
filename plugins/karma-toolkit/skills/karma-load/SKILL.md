@@ -88,6 +88,23 @@ Based on the bottlenecks found and the relative data, write a cautious rollout d
 
 Return the machine to how it was: `docker compose down -v` if Docker was used, else stop the processes and clean the test data/DB. Don't leave dependencies or seed data lying around.
 
+## Anchor perf hotspots in CLAUDE.md (automatic)
+
+Capture the performance-sensitive spots and the bottlenecks you fixed, so future code doesn't reintroduce them. As a standard final step, write/refresh this skill's sub-block in the umbrella `karma-toolkit` block at the **end** of the project root `CLAUDE.md`. **Write it automatically — do not ask.** This is the one exception to the plan-first contract: the fix *plan* and any code changes stay gated as above, but this small managed note is written without a prompt (in plan mode the write defers to the execution phase like any edit). Touch only your own `<!-- karma-load:start/end -->` sub-block; idempotent on the markers — no umbrella block yet → append it at the end of the file (create `CLAUDE.md` if absent); your sub-block already present → replace its body, never duplicate; leave other skills' sub-blocks intact.
+
+```
+<!-- karma-toolkit:start -->
+## karma-toolkit — project conventions (managed; edited by the karma-* skills)
+
+<!-- karma-load:start -->
+Perf hotspots here: <the real ones — e.g. build_doc was N+1, now batched (content.py); leaderboard has a composite index; connection pool sized to the threadpool>. Load notes: <path to the scaling / load-test doc if one was written>.
+- New endpoint / query → check for N+1 and missing indexes; watch the connection-pool ceiling under concurrency.
+<!-- karma-load:end -->
+<!-- karma-toolkit:end -->
+```
+
+Fill with the project's **actual** hotspots and pool sizing (`file:line` where useful), not a generic note. If this run found and fixed nothing worth remembering, write nothing.
+
 ## Guardrails
 
 - Local results are relative and for bug-finding — never present them as prod-valid absolutes.
