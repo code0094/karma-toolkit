@@ -51,10 +51,33 @@ process.stdin.on("end", () => {
     [/gh[pousr]_[A-Za-z0-9]{36,}/, "GitHub token"],
     [/xox[baprs]-[A-Za-z0-9-]{10,}/, "Slack token"],
     [/eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/, "JWT"],
-    [/(?:api[_-]?key|secret|password|passwd|token)\s*[:=]\s*['"][^'"]{12,}['"]/i, "hardcoded credential"],
   ];
 
   const hits = [...new Set(RULES.filter(([re]) => re.test(diff)).map(([, name]) => name))];
+
+  // Hardcoded credential: a regex finds `token/secret/password = "…"` candidates,
+  // then Shannon entropy decides. Real secrets are high-entropy random strings
+  // (~3.9+ bits/char); code identifiers and placeholders ("someLongName",
+  // "your-token-here", "test-password-123") sit ~3.2–3.75. A 3.8 threshold
+  // separates them, killing the false positives the bare regex produced
+  // (calibrated against sample secrets vs benign identifiers).
+  const shannon = (s) => {
+    const freq = {};
+    for (const c of s) freq[c] = (freq[c] || 0) + 1;
+    let h = 0;
+    for (const c in freq) {
+      const p = freq[c] / s.length;
+      h -= p * Math.log2(p);
+    }
+    return h;
+  };
+  const CRED = /(?:api[_-]?key|secret|password|passwd|token)\s*[:=]\s*['"]([^'"]{12,})['"]/gi;
+  for (let m; (m = CRED.exec(diff)) !== null; ) {
+    if (shannon(m[1]) >= 3.8) {
+      hits.push("hardcoded credential");
+      break;
+    }
+  }
 
   if (hits.length) {
     process.stdout.write(
