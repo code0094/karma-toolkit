@@ -1,6 +1,6 @@
 # karma-toolkit
 
-Plan-first семейство скиллов «довести код до продакшена» для Claude Code. Восемь скиллов, каждый оборачивает один воркфлоу с независимым критиком/верификатором и честной оговоркой о пределах — плюс два хука: `SessionStart` подмешивает в каждую сессию постоянную plan-first-политику, а `PreToolUse` сканирует изменения на секреты перед `git push`.
+Plan-first семейство скиллов «довести код до продакшена» для Claude Code. Восемь скиллов, каждый оборачивает один воркфлоу с независимым критиком/верификатором и честной оговоркой о пределах — плюс хук `SessionStart`, подмешивающий в каждую сессию постоянную plan-first-политику.
 
 ## Скиллы
 
@@ -42,7 +42,7 @@ claude plugin validate ./plugins/karma-toolkit
 claude --debug
 ```
 
-Оба хука запускаются в exec-форме через `node` (работает и под Git Bash, и под PowerShell на Windows): `SessionStart` подмешивает политику в контекст сессии, а `PreToolUse` блокирует `git push`, если в изменениях найдены секреты (эвристический скан — сеть безопасности, не гарантия).
+Хук запускается в exec-форме через `node` (работает и под Git Bash, и под PowerShell на Windows): `SessionStart` подмешивает plan-first-политику в контекст каждой сессии. Проверку секретов перед публикацией делает скилл `karma-security` (аудитом, включая git-историю), а не хук.
 
 ## Структура
 
@@ -52,9 +52,8 @@ claude --debug
 └── plugins/
     └── karma-toolkit/
         ├── .claude-plugin/plugin.json
-        ├── hooks/hooks.json          # SessionStart + PreToolUse (secret-scan)
+        ├── hooks/hooks.json          # SessionStart
         ├── scripts/
-        │   ├── session-start.js      # печатает политику как additionalContext
-        │   └── secret-scan.js        # сканит дифф на секреты перед git push
+        │   └── session-start.js      # печатает политику как additionalContext
         └── skills/karma-*/SKILL.md   # восемь скиллов
 ```
