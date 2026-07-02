@@ -61,6 +61,12 @@ process.stdin.on("end", () => {
   // "your-token-here", "test-password-123") sit ~3.2–3.75. A 3.8 threshold
   // separates them, killing the false positives the bare regex produced
   // (calibrated against sample secrets vs benign identifiers).
+  //
+  // The captured value must contain no whitespace: in a literal like
+  // "apikey=" + code, the literal's CLOSING quote reads as an opening quote and
+  // a bare [^'"] class swallows the following code — across newlines — as the
+  // "value"; code is high-entropy too, so the entropy gate can't save us.
+  // Real quoted secrets never contain spaces or line breaks.
   const shannon = (s) => {
     const freq = {};
     for (const c of s) freq[c] = (freq[c] || 0) + 1;
@@ -71,7 +77,7 @@ process.stdin.on("end", () => {
     }
     return h;
   };
-  const CRED = /(?:api[_-]?key|secret|password|passwd|token)\s*[:=]\s*['"]([^'"]{12,})['"]/gi;
+  const CRED = /(?:api[_-]?key|secret|password|passwd|token)\s*[:=]\s*['"]([^'"\s]{12,})['"]/gi;
   for (let m; (m = CRED.exec(diff)) !== null; ) {
     if (shannon(m[1]) >= 3.8) {
       hits.push("hardcoded credential");
