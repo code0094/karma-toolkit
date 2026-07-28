@@ -5,13 +5,13 @@ description: Итеративная петля качества кода. Све
 
 # Karma Loop
 
-Hill-climb code quality with an independent judge. Each round a **fresh, read-only** code-reviewer subagent grades the code and lists concrete issues. You fix the high-value ones, validate, and re-review. Stop when the bar is met or the loop provably can't improve.
+Hill-climb code quality with an independent judge. Each round a **fresh, read-only** code-reviewer subagent grades the code and lists concrete issues. You fix the high-value ones, validate, and re-review. Stop only when the bar is met — or when the user tells you to stop.
 
 A valid result is: `Already at the bar — no changes needed`.
 
 ## Autonomous by design (the one exception)
 
-Unlike the other karma-* skills, this one is **autonomous**: it loops fix → re-grade without stopping for per-change approval — that is its purpose. It still records what it changed each round (the decision journal) and halts only when it reaches the pass threshold — or when you stop it manually, since there is no iteration cap (see Stop Condition). If you want plan-first control instead, run it in plan mode or use a different karma-* skill.
+Unlike the other karma-* skills, this one is **autonomous**: it loops fix → re-grade without stopping for per-change approval — that is its purpose. It still records what it changed each round (the decision journal) and halts only when it reaches the pass threshold — or when the **user** stops it manually, since there is no iteration cap (see Stop Condition). If you want plan-first control instead, run it in plan mode or use a different karma-* skill.
 
 ## Roles (strict separation)
 
@@ -48,7 +48,9 @@ If `overall` < 9.5 the judge MUST return at least one actionable issue (it canno
 
 - **PASS** — `overall` >= 9.5 on **two consecutive passes**. The first >=9.5 triggers a *confirming pass* with no edits in between; only a second >=9.5 ends the loop. (This beats single-judge noise at the threshold.)
 
-This loop is **unbounded by design** (the user's explicit choice): there is no max-iteration cap and no plateau stop. It runs until PASS — which a strict judge may take many rounds to grant, or may never grant if it keeps finding new nits. **Consequences to accept:** it can burn tokens indefinitely and may oscillate (one round's fix undone by a later round). Watch the token budget and **stop it manually** if it stops converging. Always keep and report the **best-scoring** version, not necessarily the last one.
+This loop is **unbounded by design** (the user's explicit choice): there is no max-iteration cap and no plateau stop. It runs until PASS — which a strict judge may take many rounds to grant, or may never grant if it keeps finding new nits. **Consequences the user has accepted:** it can burn tokens indefinitely and may oscillate (one round's fix undone by a later round). The token-budget watch belongs to the **user**, who can stop the loop at any time.
+
+**You — the executing agent — never stop the loop on your own.** Not for token spend, not for a plateau, and not for a shrinking context window: when context runs out, the harness summarizes and the session continues — that is normal operation, not a reason to wrap up. Keep the decision journal current (and the per-round work committed where the project allows) so that after a summarization you re-orient from the journal and keep looping. If you believe continuing is genuinely harmful (e.g. hard oscillation), say so in one line and **ask** the user to stop — the decision is theirs. Always keep and report the **best-scoring** version, not necessarily the last one.
 
 ## Loop Procedure
 
@@ -66,7 +68,7 @@ a. **Judge.** Spawn a fresh judge subagent (see Roles — `feature-dev:code-revi
 b. **Check stop.** Record `overall`, update the best version.
    - If `overall` >= 9.5 **and** the previous pass was also >= 9.5 -> **DONE (PASS)**.
    - If `overall` >= 9.5 and it's the first such pass -> run a **confirming pass**: go back to (a) with NO edits.
-   - Otherwise continue to (c). There is no iteration cap — only PASS or a manual stop ends the loop.
+   - Otherwise continue to (c). There is no iteration cap — only PASS or the user's manual stop ends the loop.
 
 c. **Fix.** Take the highest-value issues (blockers/majors first). Make the **minimal connected diff**. Preserve public API, contracts, response shapes, permissions, security behavior, and business behavior unless the user asked otherwise — keep changes minimal and behavior-preserving. Do not chase the score with cosmetic churn.
 
@@ -81,7 +83,7 @@ e. **Gate.** Run the relevant tests/typecheck/lint for the touched surface.
 - **Don't game the rubric.** Cosmetic changes that please the judge without improving the code are failures, not progress.
 - **Don't change behavior to chase a score.** Functional/contract changes need explicit user intent.
 - **Don't let the judge edit.** It is read-only; keep it that way.
-- **Unbounded loop — mind the budget.** There is no iteration cap; the loop ends only on PASS or when you stop it. Watch token spend and halt manually if it stops converging or starts oscillating.
+- **Unbounded loop — the stop belongs to the user.** There is no iteration cap; the loop ends only on PASS or when the user stops it. Never halt on your own — not for token spend, not for plateau, not for low context (the harness compacts and you continue from the journal). At most, flag a concern in one line and keep looping unless told to stop.
 - **Return the best version, not the last.** A later round can score lower.
 - **Be honest about the gate.** If tests couldn't run, say so; don't imply validation that didn't happen.
 
@@ -98,7 +100,7 @@ Round N | overall: X.X
 
 ## Final Report
 
-- **Outcome:** PASS (>=9.5 x2) / stopped manually at X.X / no changes needed.
+- **Outcome:** PASS (>=9.5 x2) / stopped by the user at X.X / no changes needed.
 - **Score trajectory:** round-by-round overall scores.
 - **What changed** across rounds and why it matters.
 - **Behavior/contracts preserved** (confirm).
