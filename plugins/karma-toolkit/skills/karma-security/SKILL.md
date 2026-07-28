@@ -113,6 +113,22 @@ Probe from an authenticated user's perspective using what recon revealed (routes
 - **Rate limits:** real enforcement on login/registration/reset/OTP; per-user not just per-IP; reset-on-success allowing slow brute force.
 - **Error differentials:** "not found" vs "forbidden" leaking existence; format consistency; verbose errors per auth state; fail-open on error.
 
+#### IDOR sweep (structured — enumerate, don't eyeball)
+
+IDOR is a bug of **absence**: the missing ownership check. Absence is found by enumerating every place the check must exist, not by reading code attentively. Run this as its own pass:
+
+1. **Inventory.** List every endpoint/route/handler whose parameters (path, query, body, header) address an object owned by a user or tenant — `/document/{id}`, `?order_id=`, file/asset keys, export and report ids, GraphQL node ids, batch/bulk endpoints, webhooks, admin lookups. For each record: method, path, the id parameter, the object it addresses, and which check enforces ownership today, at `file:line` (or "none").
+2. **Completeness check (independent).** Hand the inventory to a **fresh** subagent whose only job is to find what the list **missed** — it must re-derive the routes itself and diff against the list. A missed endpoint is an unaudited IDOR; depth on the others does not compensate.
+3. **Per-endpoint review.** Go one endpoint at a time; on large surfaces spawn a subagent per endpoint. Verify the handler enforces ownership **of the object**, not merely authentication: the query is scoped to the current principal (`WHERE owner_id = :current_user`) or an explicit authz check runs before the read/write. Cover **writes and deletes**, not just reads, and **nested/related objects** — access to a parent does not authorize its children.
+4. **Verify.** Candidates go through the standard Verifier pass (is the path reachable, is it really unscoped) before being reported.
+
+Judgment rules for this class:
+
+- Non-guessable ids (UUID) reduce discoverability but are **not** a fix — the ownership check is. Report incrementing ids as an aggravating factor, never as the vulnerability itself.
+- The right answer for a denied object is **403**, or **404** when the object's very existence is sensitive. Say which the endpoint should return.
+- Client-supplied data is never a control: "the frontend only sends the user's own id" does not make it the backend's problem to skip.
+- If a **correct** id returns the **wrong** object, that is a query/relationship bug, not IDOR — report it separately.
+
 ### Phase 4 — Security hotspots [NIST: ID + GV]
 
 Flag sensitive areas that aren't vulnerable today but break dangerously if edited carelessly: crypto/hashing, auth boundaries, permission checks, dynamic code execution, input/output boundaries, query construction, filesystem ops, third-party integrations, security config, error/failure handling, AI/LLM integration points. Note location, why sensitive, risk if modified, what to watch in PRs.
@@ -143,6 +159,7 @@ Structural (god classes, duplicated security logic, dead code with live routes),
 
 - **Don't change code by default.** Produce the verified, prioritized plan and let the user approve.
 - On approval (or an explicit fix request), apply minimal fixes, then re-run a focused verification on the fixed area to confirm the issue is gone and nothing regressed.
+- **Access-control gaps are fixed test-first.** For a confirmed IDOR or authz gap, write the cross-user test before the fix — user B requests/modifies user A's object, expect 403/404 — watch it **fail**, apply the minimal backend fix, watch it **pass**. One test then carries three jobs: reproduction, proof of fix, and permanent regression guard. Follow the project's TDD conventions if a `karma-tests` block in CLAUDE.md defines them.
 
 ## Report
 
