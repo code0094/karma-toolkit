@@ -1,9 +1,9 @@
 ---
-name: karma-ui-deslop
+name: karma-slop
 description: Inspect a rendered interface for generic visual patterns, content gaps and usability defects, then produce and verify a corrected responsive mockup. Use for UI de-slopping, visual audits with proposed redesigns, and before/after interface comparisons.
 ---
 
-# Karma UI Deslop
+# Karma Slop
 
 Improve the existing screen for its actual audience and task. Deliver observable findings and a browser-checked mockup that demonstrates the corrections.
 

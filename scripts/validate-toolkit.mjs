@@ -36,7 +36,7 @@ for(const file of files.filter(p=>p.endsWith('.md'))){
   assert(fs.existsSync(dest),'Missing reference in '+file+': '+target);references++;
  }
 }
-const checks=read(path.join(skillsDir,'karma-ui-deslop/references/checklist.md'));
+const checks=read(path.join(skillsDir,'karma-slop/references/checklist.md'));
 const ids=[...checks.matchAll(/^\| (CH\d{2}) \|/gm)].map(m=>m[1]);
 assert.deepEqual(ids,Array.from({length:48},(_,i)=>'CH'+String(i+1).padStart(2,'0')));
 assert(read(path.join(skillsDir,'karma-humanize/LICENSE')).includes('MIT License'));
