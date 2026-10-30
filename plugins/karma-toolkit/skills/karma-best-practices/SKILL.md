@@ -1,6 +1,6 @@
 ---
 name: karma-best-practices
-description: Отправляет субагентов искать, как другие уже решили конкретную задачу — готовые опенсорс-либы, референс-реализации, каноничные паттерны (веб + GitHub). Вызывай с аргументом-проблемой, когда упёрся в задачу, которую не решить из головы, или начинаешь новую фичу/проект — возможно, код писать не надо, он уже лежит опенсорс. Веттит кандидатов (живость, лицензия, CVE, соответствие масштабу проекта), независимо верифицирует рекомендацию, выдаёт варианты с trade-off — взять либу / адаптировать референс / написать самим — и по апруву интегрирует выбранное. Честно — популярное не значит правильное и не значит подходящее.
+description: Найти и проверить готовые библиотеки и подходы для конкретной задачи; сравнить повторное использование с собственной реализацией.
 ---
 
 # Karma Best Practices
@@ -9,9 +9,9 @@ Don't reinvent the wheel — and don't import a dump truck to carry a bag of gro
 
 This skill looks **outward**; the rest of the karma family audits your own code. It is on-demand (a problem exists), not a pre-production gate — it is intentionally NOT part of karma-preflight.
 
-## Plan-first contract
+## Scope and execution
 
-By default this skill produces a **discussable plan, not changes**. It ends its research with ranked options and a recommendation — *what / why / trade-offs* — then **stops for discussion and approval**. Integration happens only after an explicit go-ahead, as a separate execution phase. For hard enforcement, run the skill in plan mode (Shift+Tab), where edits are blocked until you approve.
+An audit, research, or planning request produces findings and a proposed next step, without changing application code or project instructions. An explicit implementation/fix request authorizes the necessary in-scope edits and verification; do not ask for the same approval again. Ask only when a material choice or expansion remains unresolved. Honor the host's actual plan/read-only mode; do not assume a keyboard shortcut or switch modes yourself. Commit and push only when authorized by the task or applicable project instructions.
 
 ## Honesty contract (read first)
 
@@ -32,11 +32,11 @@ Before searching, pin down the constraints that decide fit:
 - **Project license** — what dependency licenses are compatible (GPL into a proprietary app is a stop).
 - **Scale** — the real expected load/size, so candidates are judged for THIS scale, not for Google's.
 - **Dependency budget** — how heavy a dependency this project can tolerate; existing deps that already partially solve the problem.
-- **Prior decisions** — check the `karma-best-practices` block in CLAUDE.md (see Anchor below): if this problem was already decided here, surface that instead of re-litigating.
+- **Prior decisions** — check the `karma-best-practices` block in AGENTS.md (see Anchor below): if this problem was already decided here, surface that instead of re-litigating.
 
 ## Step 1 — Search prior art (multi-modal, delegated)
 
-Spawn search subagents (running the most capable model available at the highest reasoning effort — do not name or assume any model family/version; if none is explicitly selectable, inherit the session's model and never downgrade). Run modalities **in parallel**, each blind to the others:
+Spawn search subagents (inherit the session model and reasoning settings unless the user asks otherwise). Run modalities **in parallel**, each blind to the others:
 
 - **Package registry of the stack** (npm / PyPI / pub.dev / crates.io / NuGet…) — existing libraries for the problem.
 - **GitHub** — `gh search repos` / `gh search code` when the CLI is available, else web search — reference implementations, how mature projects solve it.
@@ -66,15 +66,15 @@ Present a short ranked list (2-4 options), each with *what it is / evidence (liv
 - **Adapt a reference** — when implementations exist but as patterns, not packages; cite the source.
 - **Write it yourself (~N lines)** — when the honest answer is that 15 lines beat a 5 MB dependency.
 
-State a recommendation and **stop for approval**. If nothing found survives vetting, say so plainly — "no trustworthy prior art; write it" is a valid, honest result.
+If choosing an option remains outside the user’s existing authorization, present the choice and wait. Otherwise continue the authorized integration. If nothing found survives vetting, say so plainly — "no trustworthy prior art; write it" is a valid, honest result.
 
 ## Integration (gated)
 
-On approval, integrate the chosen option as minimal diffs following the project's conventions: add the dependency (pinned), wire it in, respect the project's CLAUDE.md conventions (including the karma-tests TDD block if present — test-first where it applies), and run the full suite green. Flag anything the integration surfaced that changes the trade-off (e.g. the lib needs three more transitive deps than advertised) instead of pushing through.
+When integration is authorized, integrate the chosen option as minimal diffs following the project's conventions: add the dependency (pinned), wire it in, respect the project's AGENTS.md conventions (including the karma-tests TDD block if present — test-first where it applies), and run the full suite green. Flag anything the integration surfaced that changes the trade-off (e.g. the lib needs three more transitive deps than advertised) instead of pushing through.
 
-## Anchor the decision in CLAUDE.md (automatic)
+## Anchor the decision in AGENTS.md (after authorized work)
 
-Record adopted decisions so a future session doesn't re-litigate or duplicate them. As a standard final step — **only when something was actually decided** (adopted a lib/pattern, or explicitly rejected candidates in favor of writing it) — write/refresh this skill's sub-block in the umbrella `karma-toolkit` block at the **end** of the project root `CLAUDE.md`. **Write it automatically — do not ask.** This is the one exception to the plan-first contract: integration code stays gated as above, but this small managed note is written without a prompt (in plan mode the write defers to the execution phase like any edit). Touch only your own `<!-- karma-best-practices:start/end -->` sub-block; idempotent on the markers — no umbrella block yet → append it at the end of the file (create `CLAUDE.md` if absent); your sub-block already present → replace its body, never duplicate; leave other skills' sub-blocks intact.
+Record adopted decisions so a future session doesn't re-litigate or duplicate them. As a standard final step — **only when something was actually decided** (adopted a lib/pattern, or explicitly rejected candidates in favor of writing it) — write/refresh this skill's sub-block in the umbrella `karma-toolkit` block in the applicable project `AGENTS.md` (root for project-wide rules, scoped file for local rules). Update this note as part of authorized implementation or an explicit request to maintain project conventions. A read-only audit/research request only proposes the note; it does not write it. Record confirmed facts and adopted decisions, never recommendations as established policy. Read applicable AGENTS.md instructions first and preserve their scope and existing rules. Touch only your own `<!-- karma-best-practices:start/end -->` sub-block; idempotent on the markers — no umbrella block yet → append it at the end of the file (create `AGENTS.md` if absent); your sub-block already present → replace its body, never duplicate; leave other skills' sub-blocks intact. If the umbrella exists but this sub-block is missing, insert it before the umbrella end marker instead of appending another umbrella. Do not overwrite conflicting existing conventions; surface the conflict.
 
 ```
 <!-- karma-toolkit:start -->

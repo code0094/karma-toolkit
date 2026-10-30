@@ -1,0 +1,4 @@
+interface:
+  display_name: "Karma UI Deslop"
+  short_description: "Инспекция интерфейса и исправленный мокап до/после"
+  default_prompt: "Используй $karma-ui-deslop: проверь интерфейс и покажи исправленный адаптивный мокап с сравнением до/после."

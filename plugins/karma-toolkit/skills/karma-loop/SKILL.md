@@ -1,110 +1,46 @@
 ---
 name: karma-loop
-description: Итеративная петля качества кода. Свежий read-only субагент-ревьюер оценивает код по фиксированной шкале 0-10, ты чинишь найденное, и так по кругу до оценки 9.5 на двух проходах подряд. Работает БЕЗ лимита итераций — крутится, пока не достигнет порога, поэтому следи за расходом токенов и при необходимости останавливай вручную. Используй, когда нужно итеративно довести качество кода до максимума через автоцикл «ревью -> правки -> переревью».
+description: Итеративное улучшение кода с независимым ревью и проверками. Ограниченный цикл по умолчанию, непрерывный режим по явному запросу.
 ---
 
 # Karma Loop
 
-Hill-climb code quality with an independent judge. Each round a **fresh, read-only** code-reviewer subagent grades the code and lists concrete issues. You fix the high-value ones, validate, and re-review. Stop only when the bar is met — or when the user tells you to stop.
+Improve scoped code through independent review, minimal fixes and executable validation. Preserve product behavior and public contracts unless the user requested their change.
 
-A valid result is: `Already at the bar — no changes needed`.
+## Scope and execution
 
-## Autonomous by design (the one exception)
+Use the user's named scope; otherwise use the current task's changes. Ask before expanding an ambiguous task to the whole project. An improvement request authorizes in-scope fixes without approval each round. A review-only request produces findings without fixes.
 
-Unlike the other karma-* skills, this one is **autonomous**: it loops fix → re-grade without stopping for per-change approval — that is its purpose. It still records what it changed each round (the decision journal) and halts only when it reaches the pass threshold — or when the **user** stops it manually, since there is no iteration cap (see Stop Condition). If you want plan-first control instead, run it in plan mode or use a different karma-* skill.
+Read git status first and preserve user-owned changes. Discover validation commands and applicable AGENTS.md instructions. Inspect the test catalog when present, but verify entries against current tests. If coverage is missing, report the limitation and use a meaningful targeted check; broad test-writing needs its own scope.
 
-## Roles (strict separation)
+## Roles
 
-- **Judge** — a read-only reviewer subagent running the single most capable model available at runtime, at the highest reasoning effort available. (Do not name or assume any model family or version — not today's, not future releases. Pick whatever model is objectively strongest at the moment the skill runs, whatever it is called. If you cannot select one explicitly, let the judge inherit the session's model and never downgrade it. The judge also inherits the session's reasoning effort, so run this skill at a high effort level.) Pick the agent type by portability: if `feature-dev:code-reviewer` (from the feature-dev plugin) appears in the available agent types, prefer it; otherwise fall back to the built-in `Explore` agent, which is read-only and always present. Whichever is used, the judge is read-only and MUST NOT edit code — it only scores and reports against the rubric below. State which judge was used in the final report.
-- **Fixer** — you, the main agent. You make all edits, run all checks, and keep the decision journal. You never grade your own work; the judge's score is the only quality signal.
+- **Reviewer:** fresh independent subagent with a read-only task, no writer context fork; use available capabilities rather than assuming named Claude agent types. Inherit session model and reasoning unless instructed otherwise.
+- **Implementer:** main agent; verifies findings, makes minimal fixes, runs checks and maintains a compact decision journal.
 
-Keep these roles separate every round. Never let the judge write, and never substitute your own opinion for its score.
+If independent review is unavailable, report the limitation and do not claim an independently verified result. Never fabricate a score.
 
-## Scope
+## Review criteria
 
-Default: the whole project. If the user passes a path argument, scope the review (and fixes) to that file/folder. Note the chosen scope in the final report.
+Check correctness, security, meaningful tests, maintainability, architectural fit and unnecessary complexity. Return actionable findings with severity, file/line, concrete evidence and expected correction. Separate preferences from defects. A score may summarize the review, but must not force the reviewer to invent an issue.
 
-## The Rubric (fixed — give this to every judge verbatim)
+## Loop
 
-The judge must score each dimension and produce one overall 0-10 score. Using the same rubric every round is what keeps a *fresh* judge from drifting between rounds.
+1. Record scope, baseline checks and stop policy. Default: up to **4 fix rounds** followed by final review. Honor a user-specified budget or stricter limit.
+2. Give a fresh reviewer the scope, criteria, relevant code/tests and prior accepted decisions. Require evidence for reversing a previous decision.
+3. Check findings before acting. Fix confirmed high-value issues within scope; avoid cosmetic churn.
+4. Run appropriate checks. Failed checks are not progress. Fix forward or revert only this round's own edits without discarding pre-existing work.
+5. Record findings, corrections, validation and remaining issues. Store the journal in the task's existing notes location for multi-round work.
+6. Re-review final code. Finish successfully when no confirmed actionable defects remain in scope and applicable checks pass. Unavailable checks mean incomplete validation, not PASS.
 
-1. **Correctness & logic** — bugs, wrong edge-case handling, race conditions, off-by-one, error handling.
-2. **Security** — injection, authz/authn gaps, secret handling, unsafe deserialization, input validation.
-3. **Readability & naming** — clear names, control flow, no dead/confusing code.
-4. **Architecture & consistency** — fits existing conventions and layer boundaries; no business logic leaking into transport/infra.
-5. **Tests** — meaningful coverage of the behavior in scope, not incidental detail.
-6. **Simplicity** — no overengineering, no needless abstraction, no duplication.
+## Stop policies
 
-The judge must return a structured verdict:
+- **Default:** stop on verified completion, round/budget limit, unavailable input, or two consecutive rounds without verified progress / with conflicting repeated fixes. Report unresolved findings; a budget stop is not success.
+- **Continuous mode:** only on explicit request, continue without a default round cap. Preserve external budgets and authorization boundaries. Stop for user interruption, unavailable prerequisites or verified completion; surface oscillation and do not repeatedly apply mutually reversing edits.
+- **Score target:** if explicitly requested (for example 9.5 twice), use a fixed rubric (correctness, security, tests, maintainability, architecture, simplicity; each 0–10 with reasons, plus overall) and two independent consecutive reviews of unchanged code at the target. Checks must still pass. Report an unmet target honestly when another stop condition applies.
 
-- `overall`: number 0-10 (one decimal).
-- `dimensions`: each rubric item with a short score + one-line reason.
-- `issues`: list of `{ severity (blocker|major|minor), file:line, problem, concrete fix }`, highest-impact first.
-- `verdict_note`: one sentence on what most holds the score back.
+Keep the last verified working state. Never restore a version solely because a subjective score was higher or overwrite unrelated changes. Commit/push only when already authorized.
 
-If `overall` < 9.5 the judge MUST return at least one actionable issue (it cannot withhold a score without saying why).
+## Final report
 
-## Stop Condition
-
-- **PASS** — `overall` >= 9.5 on **two consecutive passes**. The first >=9.5 triggers a *confirming pass* with no edits in between; only a second >=9.5 ends the loop. (This beats single-judge noise at the threshold.)
-
-This loop is **unbounded by design** (the user's explicit choice): there is no max-iteration cap and no plateau stop. It runs until PASS — which a strict judge may take many rounds to grant, or may never grant if it keeps finding new nits. **Consequences the user has accepted:** it can burn tokens indefinitely and may oscillate (one round's fix undone by a later round). The token-budget watch belongs to the **user**, who can stop the loop at any time.
-
-**You — the executing agent — never stop the loop on your own.** Not for token spend, not for a plateau, and not for a shrinking context window: when context runs out, the harness summarizes and the session continues — that is normal operation, not a reason to wrap up. Keep the decision journal current (and the per-round work committed where the project allows) so that after a summarization you re-orient from the journal and keep looping. If you believe continuing is genuinely harmful (e.g. hard oscillation), say so in one line and **ask** the user to stop — the decision is theirs. Always keep and report the **best-scoring** version, not necessarily the last one.
-
-## Loop Procedure
-
-**Setup (once):**
-
-1. Run `git status --short --branch`. Note pre-existing/user-owned changes and do not clobber them. If not a git repo, warn that per-iteration rollback is manual.
-2. Discover validation commands (test, typecheck, lint, build) from package scripts, Makefile, CI config, or docs. If none exist, say so — the gate degrades to "judge-only".
-3. Initialize an empty decision journal.
-4. **Check coverage.** Read the coverage catalog (`notes/test-catalog.md`, or a `CLAUDE.md` pointer to it) and scan for existing test files. If there is no meaningful coverage, don't loop blind — use **AskUserQuestion** to suggest running `/karma-tests` first (polishing code with no test safety net just hardens unverified behavior). The user may decline and proceed anyway.
-
-**Each iteration:**
-
-a. **Judge.** Spawn a fresh judge subagent (see Roles — `feature-dev:code-reviewer` if available, else `Explore`; most capable model available, highest reasoning effort). Give it: the scope, the fixed rubric above, the required verdict format, the **coverage catalog** (so it does not flag already-covered code as untested), and the **decision journal so far** (every prior round's changes + rationale + the judge's prior top issues). Instruct it: *"Do not contradict an accepted decision from the journal unless you explicitly justify it as a regression worth reverting."* This is what prevents oscillation (round N undoing round N-1).
-
-b. **Check stop.** Record `overall`, update the best version.
-   - If `overall` >= 9.5 **and** the previous pass was also >= 9.5 -> **DONE (PASS)**.
-   - If `overall` >= 9.5 and it's the first such pass -> run a **confirming pass**: go back to (a) with NO edits.
-   - Otherwise continue to (c). There is no iteration cap — only PASS or the user's manual stop ends the loop.
-
-c. **Fix.** Take the highest-value issues (blockers/majors first). Make the **minimal connected diff**. Preserve public API, contracts, response shapes, permissions, security behavior, and business behavior unless the user asked otherwise — keep changes minimal and behavior-preserving. Do not chase the score with cosmetic churn.
-
-d. **Journal.** Append: round #, `overall`, the fixes made, the rationale, and the judge's top issues this round.
-
-e. **Gate.** Run the relevant tests/typecheck/lint for the touched surface.
-   - Green -> iteration counts as progress.
-   - Red -> revert this iteration's edits (or fix-forward only if trivial and re-gate). A red gate never counts as an improvement, regardless of what the next judge might say.
-
-## Guardrails
-
-- **Don't game the rubric.** Cosmetic changes that please the judge without improving the code are failures, not progress.
-- **Don't change behavior to chase a score.** Functional/contract changes need explicit user intent.
-- **Don't let the judge edit.** It is read-only; keep it that way.
-- **Unbounded loop — the stop belongs to the user.** There is no iteration cap; the loop ends only on PASS or when the user stops it. Never halt on your own — not for token spend, not for plateau, not for low context (the harness compacts and you continue from the journal). At most, flag a concern in one line and keep looping unless told to stop.
-- **Return the best version, not the last.** A later round can score lower.
-- **Be honest about the gate.** If tests couldn't run, say so; don't imply validation that didn't happen.
-
-## Decision Journal Format
-
-Per round, plain and compact:
-
-```
-Round N | overall: X.X
-  changes: <what was edited>
-  rationale: <why these, behavior preserved>
-  judge top issues: <the issues this score was based on>
-```
-
-## Final Report
-
-- **Outcome:** PASS (>=9.5 x2) / stopped by the user at X.X / no changes needed.
-- **Score trajectory:** round-by-round overall scores.
-- **What changed** across rounds and why it matters.
-- **Behavior/contracts preserved** (confirm).
-- **Gate status:** which tests/typecheck/lint ran and their result, or why they couldn't.
-- **Remaining issues** the judge still flags, if the loop stopped without a PASS.
-- **Best version** is the current working tree (confirm).
-- **Suggested commit message** when changes are ready.
+Report outcome (complete, limit reached, blocked or stopped), scope, rounds, confirmed improvements, actual checks and remaining risks. Include scores only if used and identify unavailable validation.

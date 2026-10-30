@@ -1,15 +1,15 @@
 ---
 name: karma-logs
-description: Аудит наблюдаемости и готовности логирования бэкенда перед продакшеном — когда сломается, сможешь ли ты увидеть что и почему? Проверяет структурное логирование, покрытие ключевых событий (запросы, ошибки, авторизация, внешние вызовы), утечки секретов и PII в логи, метрики, трейсинг, алертинг, health-чеки и гигиену прод-логов. Определяет стек и имеющиеся инструменты, выдаёт пробелы приоритизированным чек-листом и добавляет логирование только по апруву. Честно — наблюдаемость даёт УВИДЕТЬ проблемы, но не предотвращает их.
+description: Проверить логирование, метрики и диагностику сбоев; по поручению добавить недостающую наблюдаемость.
 ---
 
 # Karma Logs
 
 Before production, answer one question: **when this breaks at 3am, will we be able to see what broke and why?** Audit observability readiness, report the gaps, and optionally fill them.
 
-## Plan-first contract
+## Scope and execution
 
-By default this skill produces a **discussable plan, not changes**. It ends its analysis with a prioritized list of what it proposes to do — *what / why / where* — then **stops for discussion and approval**. Changes happen only after an explicit go-ahead, as a separate execution phase. For hard enforcement, run the skill in plan mode (Shift+Tab), where edits are blocked until you approve.
+An audit, research, or planning request produces findings and a proposed next step, without changing application code or project instructions. An explicit implementation/fix request authorizes the necessary in-scope edits and verification; do not ask for the same approval again. Ask only when a material choice or expansion remains unresolved. Honor the host's actual plan/read-only mode; do not assume a keyboard shortcut or switch modes yourself. Commit and push only when authorized by the task or applicable project instructions.
 
 ## Honesty contract
 
@@ -18,7 +18,7 @@ By default this skill produces a **discussable plan, not changes**. It ends its 
 
 ## What this skill touches
 
-- **Audit by default** — it only reports gaps. It adds or changes logging code **only on approval**, as minimal diffs, and never changes application behavior.
+- **Audit by default** — report gaps. An explicit request to implement observability authorizes minimal logging changes without a second approval. Preserve business behavior.
 
 ## Detect first (don't impose tools)
 
@@ -43,11 +43,11 @@ Detect the stack and what is already present — logging library, metrics librar
 
 ## Fixing (gated)
 
-Don't add logging by default. Present the gap list and let the user approve. On approval, add minimal structured logging / instrumentation as small diffs — no behavior change, no chatty debug spam.
+For an audit, report gaps without edits. When the user requests implementation, add minimal structured logging / instrumentation as small diffs — no behavior change, no chatty debug spam.
 
-## Anchor the logging convention in this project (automatic)
+## Anchor the logging convention in this project (after authorized work)
 
-Once logging exists in the project, capture **how it works here** so future code follows it (and so the next session knows where to look). As a standard final step, write/refresh this skill's sub-block in the umbrella `karma-toolkit` block at the **end** of the project root `CLAUDE.md`. **Write it automatically — do not ask.** This is the one exception to the plan-first contract: logging *code* changes stay gated as above, but this small managed note is written without a prompt (in plan mode the write defers to the execution phase like any edit). Touch only your own `<!-- karma-logs:start/end -->` sub-block; idempotent on the markers — no umbrella block yet → append it at the end of the file (create `CLAUDE.md` if absent); your sub-block already present → replace its body, never duplicate; leave other skills' sub-blocks intact.
+Once logging exists in the project, capture **how it works here** so future code follows it (and so the next session knows where to look). As a standard final step, write/refresh this skill's sub-block in the umbrella `karma-toolkit` block in the applicable project `AGENTS.md` (root for project-wide rules, scoped file for local rules). Update this note as part of authorized implementation or an explicit request to maintain project conventions. A read-only audit/research request only proposes the note; it does not write it. Record confirmed facts and adopted decisions, never recommendations as established policy. Read applicable AGENTS.md instructions first and preserve their scope and existing rules. Touch only your own `<!-- karma-logs:start/end -->` sub-block; idempotent on the markers — no umbrella block yet → append it at the end of the file (create `AGENTS.md` if absent); your sub-block already present → replace its body, never duplicate; leave other skills' sub-blocks intact. If the umbrella exists but this sub-block is missing, insert it before the umbrella end marker instead of appending another umbrella. Do not overwrite conflicting existing conventions; surface the conflict.
 
 ```
 <!-- karma-toolkit:start -->

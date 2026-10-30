@@ -4,11 +4,14 @@
     "name": "code0094",
     "email": "romik.ershov123@gmail.com"
   },
+  "metadata": {
+    "description": "Karma Toolkit: навыки разработки, диагностики, инспекции интерфейсов и редактуры."
+  },
   "plugins": [
     {
       "name": "karma-toolkit",
       "source": "./plugins/karma-toolkit",
-      "description": "Plan-first skill family for bringing code to production, plus a SessionStart policy hook."
+      "description": "Одиннадцать навыков для разработки, диагностики, инспекции интерфейсов, подготовки к выпуску и редактуры текстов; проектная память в AGENTS.md."
     }
   ]
 }

@@ -1,139 +1,70 @@
 ---
 name: karma-tests
-description: Покрытие основных сценариев существующего приложения автотестами, которым реально можно верить, по одной фиче за раз. Используй, когда нужно заменить ручное тестирование на e2e/интеграционные/юнит-тесты, собрать тестовый набор с нуля или системно поднять осмысленное покрытие бизнес-логики. Определяет стек и берёт популярные опенсорс-инструменты, дополняет написание тестов независимым ревьюером и (если доступно) mutation-тестированием как объективным гейтом доверия. Также используй, чтобы внедрить TDD для новой разработки.
+description: Аудит тестов, покрытие существующего поведения или разработка через TDD. При запуске уточняет режим работы.
 ---
 
 # Karma Tests
 
-Cover the app's main business scenarios with tests you can **trust**. Manual testing doesn't scale and gets forgotten; a trustworthy test checks the same thing every time, forever. Work **feature by feature**: a feature is done only when its tests exist, pass, are stable, and provably catch bugs.
+Build tests that detect meaningful behavioral regressions, not a coverage percentage.
 
-A valid result for an already well-tested area is: `Already covered — no tests needed`.
+## Initialization: ask for the mode
 
-## Plan-first contract
+On a direct invocation, first ask one short question: **Which mode: audit/coverage plan, tests for existing behavior, or implementation through TDD?** Briefly state what each mode may change. The user explicitly wants this startup question; wait for the answer before edits or test runs. Read-only discovery can continue while waiting. This is a choice of workflow, not permission for each subsequent edit.
 
-By default this skill produces a **discussable plan, not changes**. It ends its analysis with a prioritized list of what it proposes to do — *what / why / where* (which features, which scenarios, which test files) — then **stops for discussion and approval**. Writing tests happens only after an explicit go-ahead, as a separate execution phase. For hard enforcement, run the skill in plan mode (Shift+Tab), where edits are blocked until you approve.
+If the user already selected a mode in the current conversation, continue it without asking again. When another skill delegates an explicitly scoped stage (for example preflight → audit), accept that mode without another questionnaire. Ask about materially new scope only.
 
-## Core principle: trust over coverage
+## Modes and boundaries
 
-Coverage percentage lies — a green test that asserts nothing is worse than no test, because it creates false confidence. Every test must be able to fail for a real reason. Two guards enforce this:
+- **Audit / coverage plan:** inspect test code, map critical scenarios, and run existing tests when the environment is suitable. Report gaps and evidence; do not change application code, tests, the catalog, or AGENTS.md. Test runs may create temporary outputs; disclose blocked runs.
+- **Existing behavior:** add or improve tests and necessary test configuration/fixtures. Do not silently lock suspected bugs into expected behavior. Report them. A production-code testability refactor requires authorization unless the user already included it; explain the minimal change. Do not turn a coverage request into feature implementation.
+- **TDD implementation:** implement the requested feature or fix. Write a behavioral regression/acceptance test, run it and confirm it fails for the expected reason, implement the minimum change, run it green, then refactor and recheck. Editing both production code and tests is authorized by this mode within the requested task. No repeated approval between red, green and refactor.
 
-- **Subjective:** an independent reviewer subagent that grades the tests, explicitly on "can these be trusted?".
-- **Objective:** mutation testing where a mature tool exists for the stack (it breaks the code on purpose and checks that tests notice).
+If a test was written after the fix, label it a regression test rather than claiming a witnessed red phase. A red-to-green cycle is evidence, not proof that assertions or requirements are correct.
 
-Never optimize the coverage number. Optimize for tests that would scream if the behavior broke.
+## Workflow
 
-## What this skill touches
+1. Read applicable AGENTS.md instructions and identify the requested feature/scope, existing runner, fixtures, CI commands and data isolation. Prefer existing tooling.
+2. Identify observable acceptance criteria: happy path, important failure paths, boundaries, permissions and state transitions. Separate desired behavior from current behavior. Agree on genuinely ambiguous requirements.
+3. Pick the smallest useful mix of integration, unit and E2E tests. Use E2E for critical journeys, unit tests for pure logic, and integration tests for collaborating components. Avoid prescribed ratios.
+4. Work feature by feature. Use deterministic fixtures and controlled clocks/randomness/external dependencies. Never run against live production data merely because credentials are available.
+5. For broad or consequential changes, request an independent read-only reviewer of scenarios and assertions. Use a fresh context and available capabilities, inheriting session model/reasoning unless instructed otherwise. For a small regression, a focused check is sufficient. If independent review is unavailable, state that limitation.
+6. Run relevant tests and the wider suite when the affected surface warrants it. Compare failures to the baseline; distinguish pre-existing failures from regressions. Repeat tests for suspected flakiness, not automatically several times for every change.
+7. Use mutation testing when supported and proportionate. Inspect surviving mutations for real blind spots; document justified survivors and skipped checks. A reviewer score or mutation percentage is not a guarantee.
+8. Update the catalog and project conventions after authorized implementation. Commit/push only when the user's task or applicable project instructions authorize them.
 
-By default this skill **only adds test files** — it does not modify the application's production code. Covering existing behavior (characterization) must not change that behavior.
+## Coverage catalog
 
-The one exception is **testability**: occasionally existing code cannot be tested reliably without a small change (e.g. a hardcoded dependency on the clock, network, database, or a global that cannot be substituted in a test). When that happens, **stop and ask the user before touching production code** — explain the minimal change and why the test needs it. Never modify application code silently.
+Use the project's existing catalog if present; otherwise use `notes/test-catalog.md`. It is a navigation aid, not an authoritative claim that tests currently pass. Maintain it when tests change, including edits outside this skill.
 
-Bugs discovered while writing tests are **flagged to the user, never silently fixed**.
+Each entry records:
+- feature/module and observable scenarios;
+- test files or stable test identifiers;
+- command(s) for running them;
+- important uncovered cases and limitations;
+- last actual verification: date, commit/worktree context, command and result;
+- review or mutation evidence only if actually obtained.
 
-## Roles (strict separation)
+Preserve unrelated entries. Mark moved/deleted tests or outdated verification; do not claim old results apply to changed code. Confirm coverage from current tests and runs. For an audit-only request, propose catalog updates without writing them.
 
-- **Designer** — a subagent you *argue with* about WHICH scenarios to cover, before writing any test. Spawn it, then continue via follow-up messages for at most two short rounds of disagreement until you genuinely agree on a focused, high-value set.
-- **Reviewer** — a *fresh, independent* subagent (no context fork from the writer) that grades the written tests. Prefer a code-review-capable agent if available (`feature-dev:code-reviewer`), else `general-purpose`. It must never be the agent that wrote the tests.
-- **Writer** — you, the main agent. You write the tests and run everything.
+## Project conventions in AGENTS.md
 
-All subagents run the single most capable model available at runtime, at the highest reasoning effort available — do not name or assume any model family or version; if you can't select one explicitly, inherit the session's model and never downgrade it. (Same convention as the `karma-loop` skill.)
+After authorized test/TDD work, maintain a concise managed sub-block in the applicable project AGENTS.md. Respect nested scope; never replace unrelated instructions. Use the established catalog path. In an audit-only run, report a suggested block without writing it.
 
-## Two modes — do not confuse them
-
-- **Characterization (existing code):** tests written AFTER the code, locking in current observable behavior. This is the bulk of "cover the app". **Caveat:** do not bake bugs in as expected behavior — if the scenario spar reveals that current behavior looks wrong, flag it for the user, don't enshrine it in a test.
-- **TDD (new code / bug fixes going forward):** Red -> Green -> Refactor. Write a failing test first, see it red, write the minimum code to make it green, then refactor under the test's protection. Use this for any new feature or fix from now on. A TDD test is trustworthy by construction because you watched it fail.
-
-## Anchor TDD + a coverage catalog in this project
-
-TDD is a *going-forward* methodology, so anchor it **per project**, not globally. Two artifacts make the habit stick and let `karma-loop` see coverage without guessing.
-
-**1. Coverage catalog.** Maintain `notes/test-catalog.md` — a simple map of `feature / module → test files → what's covered`. Create it the first time you write tests here, and **update it whenever you add or change tests** so it never goes stale. It is the single source of truth other skills (e.g. `karma-loop`) read to know what is covered — and because the entries come from this skill, they are already vetted (designer spar + reviewer + mutation), not just "a file exists".
-
-**2. CLAUDE.md anchor (automatic).** As a standard final step, write/refresh this skill's sub-block in the umbrella `karma-toolkit` block at the **end** of the project root `CLAUDE.md`, so the next session inherits the TDD habit and the coverage-map pointer. **Write it automatically — do not ask.** This is the one exception to the plan-first contract: test/code changes stay gated as above, but this small managed note is written without a prompt (in plan mode the write defers to the execution phase like any edit). Touch only your own `<!-- karma-tests:start/end -->` sub-block; idempotent on the markers — no umbrella block yet → append it at the end of the file (create `CLAUDE.md` if absent); your sub-block already present → replace its body, never duplicate; leave other skills' sub-blocks intact. If a legacy `<!-- karma-tdd:start/end -->` block exists, replace it with the `karma-tests` sub-block below.
-
-```
+```markdown
 <!-- karma-toolkit:start -->
-## karma-toolkit — project conventions (managed; edited by the karma-* skills)
+## Karma Toolkit — project conventions
 
 <!-- karma-tests:start -->
-Tests are catalogued in `notes/test-catalog.md`.
-- New code / bug fix → write the test first (TDD).
-- New feature or a closed milestone → cover it with the karma-tests skill.
+Test scenarios and run commands: `notes/test-catalog.md`.
+- Use test-first development for behavior-changing features and bug fixes where a meaningful automated test is practical. Document exceptions and alternative verification.
+- Update relevant catalog entries when tests change; verify current code rather than trusting historical results.
+- New features and milestones: assess testing gaps within the requested scope; do not automatically trigger a whole-project audit.
 <!-- karma-tests:end -->
 <!-- karma-toolkit:end -->
 ```
 
-The milestone/feature line is a *semantic* trigger: there is no hook for "a feature started", so the agent applies this rule when it recognizes the moment. This keeps the TDD habit and a live coverage map in this project's future sessions — where you actually practice it — instead of imposing it on every session globally.
-
-## Test mix
-
-Bias toward the **Testing Trophy**, not a strict pyramid:
-
-- **Integration tests** — the largest share; best confidence-per-effort for business logic.
-- **E2E tests** — for critical end-to-end user journeys (login, checkout, the core flow).
-- **Unit tests** — a light sprinkle for tricky pure logic (calculations, parsers, edge-case branches).
-
-Match the app; don't apply a ratio dogmatically.
-
-## Stack detection
-
-Detect language/framework from manifests (`package.json`, `pyproject.toml`/`requirements.txt`, `*.csproj`, `pubspec.yaml`, `go.mod`, etc.). Pick the most popular, well-maintained **open-source** tooling for that stack: a test runner, an e2e tool, a mocking approach, and a mutation tool **if a mature one exists**. Examples (not exhaustive):
-
-| Stack | Runner / Integration | E2E | Mutation (if mature) | Mocking |
-|-------|----------------------|-----|----------------------|---------|
-| JS/TS | Vitest / Jest | Playwright | Stryker | MSW, Supertest |
-| Python | pytest (+Hypothesis) | Playwright | mutmut / cosmic-ray | responses |
-| .NET | xUnit + FluentAssertions, Testcontainers | Playwright .NET | Stryker.NET | NSubstitute |
-| Flutter/Dart | flutter_test | integration_test, patrol | mutation_test | mocktail |
-| Go | testing + testify | — | go-mutesting | — |
-
-**Prefer tooling already present in the repo** over introducing new dependencies. Only add a tool when the stack clearly lacks one.
-
-## Step 0 — Deep review and feature inventory
-
-1. Read the app and map it into **features / scenarios**: entrypoints, user journeys, business rules, state transitions.
-2. Write the feature list as a **checklist** — this is both the definition of done and the exit criterion for a long/autonomous run.
-3. Identify the existing test setup, the run command, and whether a mutation tool is available for the stack.
-4. Report the feature list to the user before starting to write tests.
-
-## Per-feature pipeline
-
-Take features one at a time. Finish a feature completely — written, stable, reviewed, gated, committed — before starting the next. (This keeps every commit shippable.)
-
-For each feature:
-
-1. **Spar on scenarios.** Spawn the Designer subagent and argue, adversarially, which scenarios matter: happy path, edge cases, error/empty/loading states, boundaries, permissions. For existing code, explicitly ask "is this behavior correct, or a bug we'd be enshrining?". Push back for up to two rounds until you agree on a focused, high-value set.
-2. **Write the tests.** Implement the agreed scenarios with the stack's tooling. Use characterization for existing behavior. Make tests **isolated and deterministic**: fresh fixtures/seed per test, no dependence on test order, no reliance on wall-clock, network, or randomness unless controlled.
-3. **Stabilize (flaky check).** Run the new tests several times (3-5x). If any flakes, fix the determinism before continuing — a flaky test is worse than no test because it trains everyone to ignore red.
-4. **Independent review.** Spawn a fresh Reviewer subagent (no context fork). Give it the agreed scenario list. It scores the tests 1-10, explicitly including "**can these be trusted?**" — do they assert meaningfully, cover the agreed scenarios, avoid tautologies and over-mocking that make passing meaningless. Below threshold (default **< 8**) -> revise and re-review.
-5. **Mutation gate (if available).** If a mature mutation tool exists for the stack, run it on this feature's code. Surviving mutants = blind spots: add or strengthen tests until the mutation score meets a sensible bar or each survivor is justified. If no tool exists, state explicitly that the objective gate was skipped.
-6. **Full green run.** Run the WHOLE suite, not just the new tests, to catch regressions. It must be green.
-7. **Commit & push.** One atomic commit for this feature's tests. Check the feature off the list.
-
-## Exit criterion
-
-Stop when every feature in the checklist is covered, reviewed, stable, and (where possible) mutation-gated. **Never imply full coverage if any feature was skipped** — report remaining uncovered features explicitly.
-
-## Autonomous / long-running use
-
-This skill is feature-by-feature by design, so it runs naturally as a long, goal-driven session: repeat the per-feature pipeline until the checklist is empty. Keep each feature atomic so progress is always shippable, and surface the running checklist so the user can see what's left.
-
-## Guardrails
-
-- Add only test files by default; never modify production code without asking first (see "What this skill touches").
-- Trust beats coverage %. Never game the number.
-- Don't bake bugs in as expected behavior — flag suspicious current behavior instead.
-- No flaky tests get committed.
-- The reviewer is independent and is never the writer; spawn it fresh.
-- The full suite must be green before every push.
-- Prefer existing repo tooling; add a new dependency only when the stack clearly lacks one.
+Create the umbrella once; replace only the `karma-tests` sub-block on subsequent runs. Preserve other skills' blocks. Replace a legacy `karma-tdd` block only in the same authorized scope. Do not write empty templates or maintain duplicate instruction files.
 
 ## Final report
 
-- **Features covered vs total** (the checklist).
-- **Test mix added** — counts of e2e / integration / unit.
-- **Tooling used** — runner, e2e, mocking, mutation tool (or "none available").
-- **Trust signals** — reviewer scores, mutation scores (or skipped + why), flaky-checks run.
-- **Suite status** — full green confirmed.
-- **Remaining uncovered features / risks.**
-- **Going forward** — recommend TDD for new features and bug fixes, with the detected tooling.
+State selected mode, scenarios checked/added versus gaps, actual commands/results, red-to-green evidence, verification limitations and catalog/convention changes. Already covered features may need no edits. Do not claim a green suite if tests could not run.

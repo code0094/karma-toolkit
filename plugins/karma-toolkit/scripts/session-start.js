@@ -9,7 +9,10 @@
 const policy = [
   "# karma-toolkit — standing policy",
   "",
-  "- The karma-* skills are plan-first: they propose a discussable plan and wait for approval before changing code. karma-loop is the intentional autonomous exception.",
+  "- Follow the requested scope: audits diagnose without code or project-instruction edits; implementation requests authorize in-scope changes and verification without repeated approvals.",
+  "- On direct karma-tests initialization, ask for audit, existing-behavior coverage, or TDD mode and wait. Reuse a mode already selected in this task or explicitly delegated by preflight.",
+  "- Maintain durable project conventions in AGENTS.md after authorized work; preserve unrelated instructions and managed blocks. Test catalogs are navigation aids, not proof of current passing tests.",
+  "- karma-loop uses bounded rounds by default; continuous or score-target modes require an explicit request. Commit, push and deployment follow task authorization.",
 ].join("\n");
 
 process.stdout.write(

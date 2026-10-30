@@ -1,7 +1,7 @@
 {
   "name": "karma-toolkit",
-  "version": "0.8.2",
-  "description": "Plan-first 'bring code to production' skill family — UI refactoring, a quality loop, tests, local load-testing, security audit, observability, prior-art research, and a preflight orchestrator. Each proposes a discussable plan, uses an independent critic/verifier, and is honest about its limits. Ships a SessionStart plan-first policy hook.",
+  "version": "0.11.0",
+  "description": "Одиннадцать навыков для диагностики, TDD, улучшения кода, инспекции интерфейсов, проверки релиза и редактуры текстов. Проектные правила в AGENTS.md, выбор режима тестирования и работа в рамках поручения.",
   "author": {
     "name": "code0094",
     "email": "romik.ershov123@gmail.com"
@@ -16,6 +16,12 @@
     "preflight",
     "production-readiness",
     "best-practices",
-    "prior-art"
+    "prior-art",
+    "debugging",
+    "writing",
+    "editing",
+    "ui-audit",
+    "typography",
+    "responsive-design"
   ]
 }

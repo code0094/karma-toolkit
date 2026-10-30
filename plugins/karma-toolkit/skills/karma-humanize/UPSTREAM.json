@@ -1,0 +1,6 @@
+{
+  "repository": "https://github.com/OzeroHAX/humanize-writing",
+  "revision": "4ed21a3605b53562c1b732a903657c73c3548d3c",
+  "source_path": "skills/humanize-writing",
+  "local_changes": ["Skill name changed to karma-humanize", "Codex interface metadata added"]
+}

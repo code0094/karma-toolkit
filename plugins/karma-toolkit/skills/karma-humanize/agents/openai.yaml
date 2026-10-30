@@ -1,0 +1,4 @@
+interface:
+  display_name: "Karma Humanize"
+  short_description: "Редактура русского и английского текста без потери смысла"
+  default_prompt: "Используй $karma-humanize: убери нейросетевые обороты из текста, сохрани факты, условия и авторскую позицию."

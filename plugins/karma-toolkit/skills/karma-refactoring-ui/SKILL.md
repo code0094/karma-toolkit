@@ -1,13 +1,13 @@
 ---
 name: karma-refactoring-ui
-description: Глубокий воркфлоу рефакторинга UI-кода для строгого владения компонентами своими визуальными стилями. Используй, когда вызывают `/karma-refactoring-ui`, просят системный UI-рефакторинг или хотят почистить страницы/экраны/роуты так, чтобы визуальные стили жили внутри переиспользуемых компонентов, а внешний код управлял только композицией раскладки.
+description: Рефакторинг UI с владением визуальными стилями внутри компонентов и внешней композицией раскладки.
 ---
 
 # Karma Refactoring (UI)
 
-## Plan-first contract
+## Scope and execution
 
-By default this skill produces a **discussable plan, not changes**. It ends its analysis with a prioritized list of what it proposes to do — *what / why / where* — then **stops for discussion and approval**. Changes happen only after an explicit go-ahead, as a separate execution phase. For hard enforcement, run the skill in plan mode (Shift+Tab), where edits are blocked until you approve.
+An audit, research, or planning request produces findings and a proposed next step, without changing application code or project instructions. An explicit implementation/fix request authorizes the necessary in-scope edits and verification; do not ask for the same approval again. Ask only when a material choice or expansion remains unresolved. Honor the host's actual plan/read-only mode; do not assume a keyboard shortcut or switch modes yourself. Commit and push only when authorized by the task or applicable project instructions.
 
 ## Core Principle
 
@@ -114,9 +114,9 @@ After each file or coherent file group, report:
 
 Pages, screens, and routes should become clean composition layers. Components should become predictable, reusable, visually self-contained units. The codebase should no longer rely on cosmetic style pass-throughs, scattered hardcoded styling, or call-site overrides to assemble final UI.
 
-## Anchor the UI convention in CLAUDE.md (automatic)
+## Anchor the UI convention in AGENTS.md (after authorized work)
 
-Capture how visual ownership works in this project so future components keep cosmetics inside and don't reintroduce call-site overrides. As a standard final step, write/refresh this skill's sub-block in the umbrella `karma-toolkit` block at the **end** of the project root `CLAUDE.md`. **Write it automatically — do not ask.** This is the one exception to the plan-first contract: the refactor *plan* and any code changes stay gated as above, but this small managed note is written without a prompt (in plan mode the write defers to the execution phase like any edit). Touch only your own `<!-- karma-refactoring-ui:start/end -->` sub-block; idempotent on the markers — no umbrella block yet → append it at the end of the file (create `CLAUDE.md` if absent); your sub-block already present → replace its body, never duplicate; leave other skills' sub-blocks intact.
+Capture how visual ownership works in this project so future components keep cosmetics inside and don't reintroduce call-site overrides. As a standard final step, write/refresh this skill's sub-block in the umbrella `karma-toolkit` block in the applicable project `AGENTS.md` (root for project-wide rules, scoped file for local rules). Update this note as part of authorized implementation or an explicit request to maintain project conventions. A read-only audit/research request only proposes the note; it does not write it. Record confirmed facts and adopted decisions, never recommendations as established policy. Read applicable AGENTS.md instructions first and preserve their scope and existing rules. Touch only your own `<!-- karma-refactoring-ui:start/end -->` sub-block; idempotent on the markers — no umbrella block yet → append it at the end of the file (create `AGENTS.md` if absent); your sub-block already present → replace its body, never duplicate; leave other skills' sub-blocks intact. If the umbrella exists but this sub-block is missing, insert it before the umbrella end marker instead of appending another umbrella. Do not overwrite conflicting existing conventions; surface the conflict.
 
 ```
 <!-- karma-toolkit:start -->

@@ -1,15 +1,15 @@
 ---
 name: karma-load
-description: Локальное нагрузочное тестирование бэкенда — найти баги и узкие места под нагрузкой перед продакшеном. Используй, когда нужно нагрузить приложение локально популярным опенсорс-инструментом (по умолчанию k6), выявить медленные запросы / N+1 / утечки / дедлоки / пределы пула соединений по логам и метрикам, замерить относительные улучшения и составить осторожный план масштабирования. Определяет, как запускается приложение (Docker если есть, иначе нативно), наращивает нагрузку ступенями против pass/fail SLO, собирает находки в notes/ затем tasks/. Работает в режиме планирования с гейтами на апрув. ТОЛЬКО ЛОКАЛЬНО — находит проблемы дёшево, но НЕ даёт прод-валидных абсолютных цифр RPS.
+description: "Локальное нагрузочное тестирование бэкенда: воспроизвести узкие места, измерить задержки и ошибки, проверить эффект исправлений."
 ---
 
 # Karma Load (local)
 
 Stress the backend on the local machine to find **what breaks and why** — bugs, bottlenecks, slow queries, leaks, deadlocks, connection-pool ceilings — and turn findings into tasks, before going to production.
 
-## Plan-first contract
+## Scope and execution
 
-By default this skill produces a **discussable plan, not changes**. It ends its analysis with a prioritized list of what it proposes to do — *what / why / where* — then **stops for discussion and approval**. Changes happen only after an explicit go-ahead, as a separate execution phase. For hard enforcement, run the skill in plan mode (Shift+Tab), where edits are blocked until you approve.
+An audit, research, or planning request produces findings and a proposed next step, without changing application code or project instructions. An explicit implementation/fix request authorizes the necessary in-scope edits and verification; do not ask for the same approval again. Ask only when a material choice or expansion remains unresolved. Honor the host's actual plan/read-only mode; do not assume a keyboard shortcut or switch modes yourself. Commit and push only when authorized by the task or applicable project instructions.
 
 ## Scope and honesty (read first)
 
@@ -19,13 +19,14 @@ By default this skill produces a **discussable plan, not changes**. It ends its 
 
 ## Operating rules
 
-- Run in **planning mode**; stop at the approval gates below before making fixes or starting a long run.
+- Honor the requested scope: inspect for an audit, run bounded local tests when requested, and fix bottlenecks when fixes are authorized. Ask only about missing load targets or a material expansion.
 - Do not change app behavior or public contracts while fixing bottlenecks beyond what the user approves — keep fixes minimal and behavior-preserving.
 - **Docker is nice-to-have, not required** — use whatever run method the project already has.
 
 ## How the app runs (detect, don't impose)
 
 - Detect the run method: a `Dockerfile`/`docker-compose.yml` -> use it (brings dependencies up in one command, and is closer to prod). No Docker -> run natively per README/manifests and bring up dependencies the way the project already does.
+- Use an isolated test stack with its own Compose project name, disposable database/volumes and synthetic data. Check effective dependency endpoints: a local app may still connect to a production database, email, payment or other external service. Disable real outbound effects or use test substitutes. Record the resources that existed before the run and those created by it.
 - Bring up the **real dependencies** the app needs (Postgres, Redis, S3 -> MinIO locally, queues/workers, crons) so the test exercises real interactions, not stubs. The DB and workers are usually where load actually hurts.
 - **Seed the DB with realistic data volume.** An empty database hides index and query cost and gives falsely good numbers.
 
@@ -43,13 +44,13 @@ Read the implementation before generating any load. Look for:
 - Synchronous/blocking I/O on hot paths, missing caching, per-request expensive work.
 - Worker/cron interactions that contend with request handling.
 
-If clear bottlenecks for the target load exist, produce a **plan as a list** — each item: **problem / why it matters / how to fix**. (For broad code discovery, delegate to a subagent if available, running the most capable model available; verify findings before acting.)
+If clear bottlenecks for the target load exist, produce a **plan as a list** — each item: **problem / why it matters / how to fix**. (For broad code discovery, delegate to a subagent if available, inheriting the session model and reasoning settings; verify findings before acting.)
 
-**GATE:** present the plan, wait for the user's green light. Do not edit code until approved.
+Present the findings. If fixes were requested, continue within that scope; otherwise finish the diagnosis without editing application code.
 
 ## Stage 2 — Make approved fixes
 
-Apply approved fixes as minimal connected diffs. Re-run a quick load check to confirm the **relative** improvement (before/after under the same scenario).
+Before editing, capture a bounded baseline under the same scenario and dataset used for comparison. If no baseline can be captured, state that relative improvement is not yet measured. Apply authorized fixes as minimal connected diffs, then rerun the scenario.
 
 ## Stage 3 — Load test plan (GATE)
 
@@ -59,7 +60,7 @@ Define the plan before running:
 - **Realistic scenario mix** (read/write, multiple endpoints weighted by expected traffic, think-time) — not one flat URL hammered.
 - **Ramp stages:** user-supplied targets (e.g. 1k, 3k, 5k rps). Include a short **soak** (sustained load) to catch leaks and connection exhaustion that a 30-second peak hides.
 
-**GATE:** present the plan, wait for the user's start command.
+State the scenario, duration and resource limits. An existing request to run local load testing authorizes the bounded run; ask only if targets or potentially disruptive effects remain unresolved. Stop on resource exhaustion, unexpected external traffic or error rates beyond the declared abort threshold.
 
 ## Stage 4 — Run and observe
 
@@ -86,11 +87,11 @@ Based on the bottlenecks found and the relative data, write a cautious rollout d
 
 ## Stage 7 — Teardown
 
-Return the machine to how it was: `docker compose down -v` if Docker was used, else stop the processes and clean the test data/DB. Don't leave dependencies or seed data lying around.
+Clean up only resources recorded as created for this run. Stop only owned processes/containers; remove only explicitly identified disposable test volumes/data. Never run blanket volume removal on an existing Compose project, stop pre-existing services, or clean a shared database. Preserve pre-existing resources and report anything intentionally retained.
 
-## Anchor perf hotspots in CLAUDE.md (automatic)
+## Anchor perf hotspots in AGENTS.md (after authorized work)
 
-Capture the performance-sensitive spots and the bottlenecks you fixed, so future code doesn't reintroduce them. As a standard final step, write/refresh this skill's sub-block in the umbrella `karma-toolkit` block at the **end** of the project root `CLAUDE.md`. **Write it automatically — do not ask.** This is the one exception to the plan-first contract: the fix *plan* and any code changes stay gated as above, but this small managed note is written without a prompt (in plan mode the write defers to the execution phase like any edit). Touch only your own `<!-- karma-load:start/end -->` sub-block; idempotent on the markers — no umbrella block yet → append it at the end of the file (create `CLAUDE.md` if absent); your sub-block already present → replace its body, never duplicate; leave other skills' sub-blocks intact.
+Capture the performance-sensitive spots and the bottlenecks you fixed, so future code doesn't reintroduce them. As a standard final step, write/refresh this skill's sub-block in the umbrella `karma-toolkit` block in the applicable project `AGENTS.md` (root for project-wide rules, scoped file for local rules). Update this note as part of authorized implementation or an explicit request to maintain project conventions. A read-only audit/research request only proposes the note; it does not write it. Record confirmed facts and adopted decisions, never recommendations as established policy. Read applicable AGENTS.md instructions first and preserve their scope and existing rules. Touch only your own `<!-- karma-load:start/end -->` sub-block; idempotent on the markers — no umbrella block yet → append it at the end of the file (create `AGENTS.md` if absent); your sub-block already present → replace its body, never duplicate; leave other skills' sub-blocks intact. If the umbrella exists but this sub-block is missing, insert it before the umbrella end marker instead of appending another umbrella. Do not overwrite conflicting existing conventions; surface the conflict.
 
 ```
 <!-- karma-toolkit:start -->
