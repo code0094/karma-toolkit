@@ -38,6 +38,8 @@ Honor the requested scope: audit-only reports findings; visual-only or verbatim-
 
 ## Correct coherently
 
+Before a substantial redesign, state a short brief grounded in the inspected screen: its audience and primary task, the existing qualities worth preserving, and what the findings justify strengthening. Use concrete content, workflow and brand evidence rather than adjectives such as modern or premium. Include this brief in the comparison artifact; a small correction needs only a short rationale. Do not invent a signature detail, visual metaphor or accent merely to make the screen distinctive. Continue without an extra approval pause when the requested scope and direction are clear; audit-only work proposes corrections without implementing them.
+
 Choose the smallest coherent set of changes that settles the findings. Use existing components, fonts, semantic colors and spacing conventions where they work. A different composition is appropriate when hierarchy or workflow requires it; a fresh palette is not a substitute for composition.
 
 Keep a content/action inventory: facts, source wording, values, prices, links, fields, handlers, navigation and relevant states. Track authorized wording changes separately so semantic preservation does not require identical strings. Correct layout around real content, including long labels. Do not improve the picture by removing inconvenient content or actions, inventing proof, changing brand identity or fabricating backend success. Mark prototype-only behavior visibly. Preserve useful grouping and information density; functional tables may scroll horizontally inside an intentional region.
@@ -60,11 +62,15 @@ Use the project's stack or a small self-contained HTML preview appropriate to th
 
 Compare before/after at identical viewport sizes, data and states. Revisit the checklist against the final render: record which findings are resolved, which patterns remain intentionally, and whether a replacement introduced another template. Check the content/action inventory and whether the old screen did anything better. Fix material regressions in one batch and verify the affected checks again. Stop after one correction batch plus confirmation unless the user requests more; report remaining issues honestly. If browser inspection is unavailable, deliver the preview with that limitation, never a claimed visual pass.
 
+Within that same comparison, check the result against the brief: did it lose useful density, recognizable character or effective emphasis from the original? Explain which material choices answer this product's actual content and tasks. Familiar settings, sign-in forms and other conventional workflows need not look unique; similarity alone is not a finding and does not justify extra decoration. Record any loss or deliberate tradeoff alongside the existing findings, not in a second checklist or an additional redesign round.
+
 Verify the delivery surface too. A report that works through `file://` may fail in an isolated chat preview. For a self-contained preview, embed required images, styles, scripts and fonts, and avoid links that depend on sibling files or blocked popups/frames. Test the actual viewer or its documented restrictions; state when only an equivalent sandbox was tested.
 
 ## Deliver
 
 Provide the preview path or URL, desktop/mobile before/after images or a comparison page, the material visual and copy changes, preserved behavior actually checked, and remaining unknowns. Collect unresolved content needs into a short list of specific facts or assets required from the user. Keep explanation proportional to the work. An audit-only request ends with findings; implementation belongs to the scope the user selected.
+
+For the main corrections, connect a visible before/after detail to its reason: for example a clipped title, an obscured action, broken grouping or an avoidable wrap. Use a few paired crops or numbered callouts when they make the change easier to understand; add dimensions or alignment guides only when a measured geometry issue matters. Keep the clean mockup available and annotations separate from product code, without obscuring content or implying that every stylistic choice is a defect. Static comparisons are the deliverable; do not add video generation or recording to this workflow.
 
 Include the completed checklist in the audit artifact or an expandable section of the comparison; for audit-only chat output, use a compact table. Summarize consequential findings in the main response rather than pasting 48 rows there. Never report an AI-authorship probability or a quality score derived from the number of matching patterns.
 
